@@ -2,71 +2,98 @@ using UnityEngine;
 
 public class PaddleFlickController : MonoBehaviour
 {
-    [Header("Configuración del Muñequeo")]
-    [Tooltip("Multiplicador para aumentar la fuerza del 'muñequeo'. Empieza en 0.5 y ajusta.")]
-    [SerializeField] private float flickMultiplier = 0.5f;
+    [Header("Configuración del Golpe")]
+    [Tooltip("Multiplicador de fuerza del golpe. Sube si el golpe se siente débil.")]
+    [SerializeField] private float flickMultiplier = 3.5f;
 
-    [Header("Parámetros de Colisión")]
-    [Tooltip("Tag para identificar la pelota.")]
+    [Tooltip("Velocidad mínima de la pala para registrar un golpe válido.")]
+    [SerializeField] private float minHitSpeed = 0.4f;
+
+    [Tooltip("Tiempo mínimo entre golpes (segundos). Evita doble-impacto.")]
+    [SerializeField] private float hitCooldown = 0.15f;
+
+    [Tooltip("Tag de la pelota.")]
     [SerializeField] private string ballTag = "Ball";
 
-    // Variables para calcular la velocidad manual
-    private Vector3 lastPosition;
-    private Quaternion lastRotation;
-    private Vector3 manualVelocity;
-    private Vector3 manualAngularVelocity;
+    // ── Velocity tracking ────────────────────────────────
+    private Vector3    _lastPosition;
+    private Quaternion _lastRotation;
+    private Vector3    _manualVelocity;
+    private Vector3    _manualAngularVelocity;
+    private float      _cooldownTimer;
 
     void Start()
     {
-        lastPosition = transform.position;
-        lastRotation = transform.rotation;
+        _lastPosition = transform.position;
+        _lastRotation = transform.rotation;
     }
 
     void FixedUpdate()
     {
-        // 1. Calcular velocidad linear manual
-        manualVelocity = (transform.position - lastPosition) / Time.fixedDeltaTime;
-        lastPosition = transform.position;
+        // ── Track linear velocity ────────────────────────
+        _manualVelocity = (transform.position - _lastPosition) / Time.fixedDeltaTime;
+        _lastPosition   = transform.position;
 
-        // 2. Calcular velocidad angular manual (aproximación)
-        Quaternion deltaRotation = transform.rotation * Quaternion.Inverse(lastRotation);
-        deltaRotation.ToAngleAxis(out float angle, out Vector3 axis);
-        // Asegurar que el ángulo esté en el rango -180 a 180
+        // ── Track angular velocity ───────────────────────
+        Quaternion delta = transform.rotation * Quaternion.Inverse(_lastRotation);
+        delta.ToAngleAxis(out float angle, out Vector3 axis);
         if (angle > 180f) angle -= 360f;
-        manualAngularVelocity = axis * (angle * Mathf.Deg2Rad / Time.fixedDeltaTime);
-        lastRotation = transform.rotation;
+        _manualAngularVelocity = axis * (angle * Mathf.Deg2Rad / Time.fixedDeltaTime);
+        _lastRotation = transform.rotation;
+
+        // ── Tick cooldown ────────────────────────────────
+        if (_cooldownTimer > 0f) _cooldownTimer -= Time.fixedDeltaTime;
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag(ballTag))
+        if (!collision.gameObject.CompareTag(ballTag)) return;
+        if (_cooldownTimer > 0f) return;   // prevent double-hit same frame
+
+        Rigidbody ballRb = collision.gameObject.GetComponent<Rigidbody>();
+        if (ballRb == null) return;
+
+        // ── Speed of paddle at the contact point ─────────
+        Vector3 contactPoint  = collision.contacts[0].point;
+        Vector3 contactNormal = collision.contacts[0].normal;
+
+        // Full point velocity: linear + angular contribution
+        Vector3 pointVelocity = _manualVelocity +
+            Vector3.Cross(_manualAngularVelocity, contactPoint - transform.position);
+
+        float paddleSpeed = pointVelocity.magnitude;
+
+        // ── Ignore weak touches ──────────────────────────
+        if (paddleSpeed < minHitSpeed)
         {
-            // Obtenemos el Rigidbody de la pelota
-            Rigidbody ballRb = collision.gameObject.GetComponent<Rigidbody>();
-            if (ballRb != null)
-            {
-                // Punto de impacto
-                Vector3 contactPoint = collision.contacts[0].point;
-                
-                // Calculamos la velocidad de la pala en el punto de impacto
-                // La fórmula física: V_point = V_linear + W x (R_point - R_center)
-                // donde W es la velocidad angular y R es el vector de posición.
-                Vector3 pointVelocity = manualVelocity + Vector3.Cross(manualAngularVelocity, (contactPoint - transform.position));
-
-                // Unity ya calculó el rebote base. Nosotros añadimos un "impulso" extra
-                // basado en la velocidad de la pala al impactar, con un multiplicador.
-                
-                // Solo aplicamos si la velocidad del impacto es significativa
-                if (pointVelocity.magnitude > 0.1f)
-                {
-                    // Vector de dirección de la fuerza. Usamos la dirección del rebote base.
-                    Vector3 bounceDirection = ballRb.linearVelocity.normalized;
-                    float extraForce = pointVelocity.magnitude * flickMultiplier;
-
-                    // Aplicamos el impulso extra a la pelota
-                    ballRb.AddForce(bounceDirection * extraForce, ForceMode.Impulse);
-                }
-            }
+            Debug.Log($"[Paddle] Golpe débil ignorado ({paddleSpeed:F2} m/s)");
+            return;
         }
+
+        // ── Build hit direction ───────────────────────────
+        // Primary direction = where the paddle is moving
+        // We ensure the ball always goes away from the paddle face (contactNormal)
+        Vector3 hitDir = pointVelocity.normalized;
+
+        // If paddle direction opposes the contact normal, flip to avoid
+        // the ball being pushed INTO the paddle
+        if (Vector3.Dot(hitDir, contactNormal) < 0f)
+            hitDir = Vector3.Reflect(hitDir, contactNormal);
+
+        // ── Apply velocity directly ───────────────────────
+        // Instead of AddForce on top of an existing velocity (additive = unpredictable),
+        // we SET the velocity so the result is always proportional to paddle speed.
+        // This feels much more responsive and consistent.
+        Vector3 newVelocity = hitDir * (paddleSpeed * flickMultiplier);
+
+        // Guarantee a minimum upward component so ball clears the net
+        newVelocity.y = Mathf.Max(newVelocity.y, 1.5f);
+
+        ballRb.linearVelocity  = newVelocity;
+        ballRb.angularVelocity = Vector3.zero;  // clean spin
+
+        _cooldownTimer = hitCooldown;
+
+        Debug.Log($"[Paddle] Golpe — pala:{paddleSpeed:F1} m/s  pelota:{newVelocity.magnitude:F1} m/s  dir:{hitDir}");
     }
 }

@@ -69,6 +69,8 @@ providers = {
 objectSelectors = {
 }
 recentSearches = [
+	"star"
+	"xri lef"
 	"b"
 	"xri grab"
 ]
@@ -87,4 +89,4 @@ helperWidgetCurrentArea = "all"
 disabledIndexers = ""
 minIndexVariations = 2
 findProviderIndexHelper = true
-itemIconSize = 32
+itemIconSize = 0

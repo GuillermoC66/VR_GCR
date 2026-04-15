@@ -15,6 +15,10 @@ public class PaddleFlickController : MonoBehaviour
     [Tooltip("Tag de la pelota.")]
     [SerializeField] private string ballTag = "Ball";
 
+    [Tooltip("0 = ball always goes away from paddle face (safe). 1 = ball follows paddle swing direction (responsive). 0.4 is a good start.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float directionBlend = 0.4f;
+
     // ── Velocity tracking ────────────────────────────────
     private Vector3    _lastPosition;
     private Quaternion _lastRotation;
@@ -71,14 +75,21 @@ public class PaddleFlickController : MonoBehaviour
         }
 
         // ── Build hit direction ───────────────────────────
-        // Primary direction = where the paddle is moving
-        // We ensure the ball always goes away from the paddle face (contactNormal)
-        Vector3 hitDir = pointVelocity.normalized;
+        // contactNormal always points FROM the paddle face TOWARD the ball —
+        // so it is always the correct "away from paddle" direction.
+        // We blend it with paddle velocity so swing direction adds feel,
+        // but the ball can never go backward into the paddle.
+        //
+        // blend = 0.0 → purely contactNormal (safe, predictable)
+        // blend = 1.0 → purely paddle velocity direction (responsive but can flip)
+        // 0.4 is a good middle ground — tweak in Inspector if needed
+        Vector3 safeDir  = contactNormal;                         // always correct direction
+        Vector3 swingDir = pointVelocity.normalized;              // where paddle is moving
+        Vector3 hitDir   = Vector3.Lerp(safeDir, swingDir, directionBlend).normalized;
 
-        // If paddle direction opposes the contact normal, flip to avoid
-        // the ball being pushed INTO the paddle
-        if (Vector3.Dot(hitDir, contactNormal) < 0f)
-            hitDir = Vector3.Reflect(hitDir, contactNormal);
+        // Final safety: if result still points toward paddle, fall back to normal
+        if (Vector3.Dot(hitDir, contactNormal) < 0.1f)
+            hitDir = safeDir;
 
         // ── Apply velocity directly ───────────────────────
         // Instead of AddForce on top of an existing velocity (additive = unpredictable),

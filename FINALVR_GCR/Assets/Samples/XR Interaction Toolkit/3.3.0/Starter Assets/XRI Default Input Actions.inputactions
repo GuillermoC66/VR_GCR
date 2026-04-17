@@ -1299,7 +1299,7 @@
                 {
                     "name": "",
                     "id": "fed23fee-1e15-45c6-92a5-2f5749bf1bef",
-                    "path": "<XRController>{LeftHand}/{Menu}",
+                    "path": "<XRController>{LeftHand}/{MenuButton}",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

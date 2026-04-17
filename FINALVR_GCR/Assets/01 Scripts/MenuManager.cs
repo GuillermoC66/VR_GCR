@@ -12,10 +12,13 @@ public class MenuManager : MonoBehaviour
 
     [Header("Referencias del Juego")]
     public GameObject pingPongBall;
+    public BallSummoner ballSummoner;
     
     [Header("Configuración para Zurdos")]
     public GameObject rightHandPaddle;
     public GameObject leftHandPaddle;
+    public GameObject rightControllerModel; // Opcional: para ocultar el modelo del controlador si el jugador es zurdo
+    public GameObject leftControllerModel;  // Opcional: para ocultar el modelo del controlador si el jugador es zurdo
 
     [Header("Configuración de Altura (NUEVO)")]
     [Tooltip("El objeto 'Camera Offset' dentro de tu XR Origin")]
@@ -88,18 +91,25 @@ public class MenuManager : MonoBehaviour
 
     // 4. Lst_Toggle (Lefty)
     public void ToggleLefty(bool isLefty)
-    {
-        // En lugar de reprogramar los controles en tiempo real (que da muchos bugs),
-        // lo más limpio en pre-alpha es tener dos palas y activar la que corresponda.
+{
+    // Avisarle al Summoner de qué lado está jugando
+        if (ballSummoner != null)
+        {
+            ballSummoner.isLefty = isLefty;
+        }
         if (isLefty)
         {
             rightHandPaddle.SetActive(false);
             leftHandPaddle.SetActive(true);
+            leftControllerModel.SetActive(false);
+            rightControllerModel.SetActive(true); // Opcional: ocultar el modelo del controlador derecho
         }
         else
         {
             rightHandPaddle.SetActive(true);
             leftHandPaddle.SetActive(false);
+            leftControllerModel.SetActive(true); // Opcional: mostrar el modelo del controlador izquierdo
+            rightControllerModel.SetActive(false); // Opcional: ocultar el modelo del controlador derecho
         }
     }
 

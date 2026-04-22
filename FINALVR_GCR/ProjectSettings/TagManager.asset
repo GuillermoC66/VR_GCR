@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Anchor
   - Ball
+  - Table
   layers:
   - Default
   - TransparentFX

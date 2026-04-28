@@ -7,6 +7,12 @@ TagManager:
   - Anchor
   - Ball
   - Table
+  - PlayerPaddle
+  - EnemyPaddle
+  - TablePlayer
+  - TableEnemy
+  - Net
+  - Floor
   layers:
   - Default
   - TransparentFX

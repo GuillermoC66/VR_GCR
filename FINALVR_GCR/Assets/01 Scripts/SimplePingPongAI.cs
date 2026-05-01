@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class SimplePingPongAI : MonoBehaviour
 {
@@ -6,6 +7,7 @@ public class SimplePingPongAI : MonoBehaviour
     public Transform ball;
     public Rigidbody ballRb;
     public Transform aiPaddle; 
+    public MatchReferee referee; // Añadido para saber de quién es el turno
 
     [Header("Gestor de Dificultad")]
     [Range(1f, 15f)]
@@ -31,6 +33,7 @@ public class SimplePingPongAI : MonoBehaviour
 
     // Para saber si la IA está del lado izquierdo (negativo) o derecho (positivo)
     private float sideMultiplier; 
+    private bool isServing = false; // Estado para bloquear Update durante el saque
 
     void Start()
     {
@@ -45,6 +48,16 @@ public class SimplePingPongAI : MonoBehaviour
     void Update()
     {
         if (ball == null || ballRb == null || aiPaddle == null) return;
+
+        // --- LÓGICA DE SAQUE DE IA ---
+        if (referee != null && !referee.GetIsPlayerTurnToServe() && referee.GetIsServePhase())
+        {
+            if (!isServing)
+            {
+                StartCoroutine(ServeRoutine());
+            }
+            return; // Bloqueamos el rastreo normal mientras saca
+        }
 
         // 1. ¿La pelota viene hacia la IA?
         // Comparamos el signo de la velocidad con el lado de la mesa
@@ -86,5 +99,81 @@ public class SimplePingPongAI : MonoBehaviour
 
         // MOVER LA PALA
         aiPaddle.position = Vector3.MoveTowards(aiPaddle.position, targetPosition, aiSpeed * Time.deltaTime);
+    }
+
+    // --- CORRUTINA DE SAQUE ---
+    private IEnumerator ServeRoutine()
+    {
+        isServing = true;
+        
+        // Pausa inicial para que el jugador se prepare
+        yield return new WaitForSeconds(1.0f);
+
+        // Verificar que aún sea nuestro turno (por si el jugador reinició el juego)
+        if (referee == null || referee.GetIsPlayerTurnToServe() || !referee.GetIsServePhase())
+        {
+            isServing = false;
+            yield break;
+        }
+
+        // 1. Preparar la pelota para el Toss (Lanzamiento)
+        float serveZ = Random.Range(-0.3f, 0.3f); // Pequeña variación lateral
+        Vector3 serveStartPos = new Vector3(baselineX + (0.3f * sideMultiplier), startPosition.y + 0.3f, startPosition.z + serveZ);
+        
+        BallController bc = ball.GetComponent<BallController>();
+        if (bc != null) bc.ResetAndFloat(serveStartPos);
+        else 
+        {
+            ball.position = serveStartPos;
+            ballRb.linearVelocity = Vector3.zero;
+            ballRb.useGravity = false;
+        }
+
+        // 2. Mover la pala hacia atrás para tomar impulso
+        targetPosition = new Vector3(baselineX - (0.3f * sideMultiplier), startPosition.y + 0.5f, startPosition.z + serveZ);
+        
+        yield return new WaitForSeconds(0.6f); 
+
+        // 3. El Toss (Lanzar la pelota un poco hacia arriba)
+        ballRb.useGravity = true;
+        ballRb.linearVelocity = new Vector3(0f, 1.8f, 0f);
+
+        // Esperamos a que la pelota suba y empiece a bajar un poco
+        yield return new WaitForSeconds(0.35f);
+
+        // 4. El Golpe (Strike)
+        float originalSpeed = aiSpeed;
+        aiSpeed = 20f; // Velocidad muy rápida para asegurar el impacto visual y colisión
+
+        // Movemos la pala a través de la pelota
+        targetPosition = new Vector3(baselineX + (0.6f * sideMultiplier), startPosition.y + 0.2f, startPosition.z + serveZ);
+
+        // Damos un brevísimo instante para que la pala toque físicamente la pelota 
+        // y el BallReporter registre el "OnCollisionEnter" con el EnemyPaddle.
+        yield return new WaitForSeconds(0.05f);
+
+        // 5. Aplicar la trayectoria perfecta (Magia)
+        // Sobrescribimos la velocidad física resultante para garantizar un buen saque
+        bool willMiss = Random.value < (missProbability * 0.2f);
+        
+        if (!willMiss)
+        {
+            // Saque exitoso: va hacia abajo para picar en su mesa, y con fuerza hacia adelante
+            // Calculamos un ligero ángulo en Z para que no vaya siempre recto
+            float randomAngZ = Random.Range(-0.8f, 0.8f);
+            ballRb.linearVelocity = new Vector3(3.5f * sideMultiplier, -2.5f, randomAngZ);
+        }
+        else
+        {
+            // Saque fallido a propósito: directo a la red o mesa muy cerca
+            ballRb.linearVelocity = new Vector3(1.5f * sideMultiplier, -1.0f, 0f);
+        }
+
+        yield return new WaitForSeconds(0.5f); // Dar tiempo a que termine el movimiento de la pala
+
+        // Termina el saque, regresar a normalidad
+        aiSpeed = originalSpeed;
+        targetPosition = startPosition;
+        isServing = false;
     }
 }

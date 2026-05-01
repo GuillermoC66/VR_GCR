@@ -1,9 +1,15 @@
 using UnityEngine;
+using System;
 
 public class PaddleFlickController : MonoBehaviour
 {
-    [Header("Configuración del Muñequeo")]
+    public static event Action OnPlayerHit;
+    [Header("Configuración del Muñequeo (Arcade)")]
     [SerializeField] private float flickMultiplier = 0.5f;
+    [Tooltip("Velocidad mínima garantizada al golpear")]
+    [SerializeField] private float baseHitSpeed = 8f;
+    [Tooltip("Velocidad máxima permitida al golpear")]
+    [SerializeField] private float maxHitSpeed = 15f;
 
     [Header("Asistencia de Apuntado (Aim Assist)")]
     [Tooltip("0 = Física pura (Difícil). 1 = Apuntado automático (Fácil). Usa 0.1 o 0.2 para un toque sutil.")]
@@ -72,12 +78,16 @@ public class PaddleFlickController : MonoBehaviour
                     // 3. Mezclar los vectores (Magia del Aim Assist)
                     Vector3 finalDirection = Vector3.Lerp(rawDirection, idealDirection, aimAssistStrength).normalized;
 
-                    // 4. Aplicar la fuerza extra en la nueva dirección asistida
-                    float extraForce = pointVelocity.magnitude * flickMultiplier;
+                    // 4. Calcular velocidad de salida estilo Arcade
+                    float rawSpeed = pointVelocity.magnitude * flickMultiplier;
+                    float finalSpeed = Mathf.Clamp(baseHitSpeed + rawSpeed, baseHitSpeed, maxHitSpeed);
                     
-                    // Resetear la velocidad actual de la pelota para evitar que rebotes extraños interfieran
-                    ballRb.linearVelocity = Vector3.zero; 
-                    ballRb.AddForce(finalDirection * extraForce, ForceMode.Impulse);
+                    // Aplicar la velocidad directamente en lugar de usar fuerzas para evitar física volátil
+                    ballRb.linearVelocity = finalDirection * finalSpeed; 
+                    ballRb.angularVelocity = Vector3.zero; // Evitar efectos de rotación no deseados
+                    
+                    // Notificar que el jugador golpeó la pelota (útil para lógica de robots/AI)
+                    OnPlayerHit?.Invoke();
                 }
             }
         }

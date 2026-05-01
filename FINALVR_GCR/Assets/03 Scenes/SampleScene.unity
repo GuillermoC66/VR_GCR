@@ -270,7 +270,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 112787936}
-  m_Material: {fileID: 794752517}
+  m_Material: {fileID: 873126193}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -574,7 +574,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaddleFlickController
   flickMultiplier: 1.52
-  aimAssistStrength: 0.2
+  baseHitSpeed: 4
+  maxHitSpeed: 10
+  aimAssistStrength: 0.4
   targetPoint: {fileID: 1140111322}
   ballTag: Ball
 --- !u!54 &225563216
@@ -1411,7 +1413,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1.5
+  m_Radius: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &466907351
 MeshRenderer:
@@ -1497,7 +1499,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 437862dbfc5106c48b3acb5df4890f24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BallController
-  maxVelocity: 5
+  maxVelocity: 3
+  tossBoostUpward: 1.5
+  tossBoostForward: 0.5
+  useArcadePhysics: 1
+  arcadeBounciness: 0.8
 --- !u!114 &466907355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1758,7 +1764,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: d153831f9ab31284bb266a63b4c955f8, type: 3}
+  m_Resource: {fileID: 8300000, guid: 8ceb5cf7bc37ef940ad78f4970e301e2, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.3
   m_Pitch: 1
@@ -2445,19 +2451,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.3555465, y: 0, z: 1.5250001}
   m_Center: {x: -1.0252268, y: 0.76, z: 2.168}
---- !u!134 &794752517
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: TableSurface
-  serializedVersion: 2
-  m_DynamicFriction: 0.35
-  m_StaticFriction: 0.4
-  m_Bounciness: 0.85
-  m_FrictionCombine: 0
-  m_BounceCombine: 3
 --- !u!4 &798805480 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: aa71b9120c13b7e40a46fd261f11178a, type: 3}
@@ -3123,6 +3116,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 869039145}
   m_Mesh: {fileID: 22788929071467060, guid: 147ae308eec018b40a7b312ae58f44c7, type: 3}
+--- !u!134 &873126193
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: TableSurface
+  serializedVersion: 2
+  m_DynamicFriction: 0.35
+  m_StaticFriction: 0.4
+  m_Bounciness: 0.85
+  m_FrictionCombine: 0
+  m_BounceCombine: 3
 --- !u!224 &888636339 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8072890477496077224, guid: 085ce58b196caa446a8545c9dd388793, type: 3}
@@ -3726,6 +3732,59 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6150467722377659599, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
   m_PrefabInstance: {fileID: 1373153106}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1192105588
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1192105589}
+  - component: {fileID: 1192105590}
+  m_Layer: 6
+  m_Name: Collider_Body
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1192105589
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1192105588}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1630708963}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1192105590
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1192105588}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2.74, y: 0.76, z: 1.525}
+  m_Center: {x: -0.333, y: 0.38, z: 2.168}
 --- !u!1 &1195680526
 GameObject:
   m_ObjectHideFlags: 0
@@ -3916,6 +3975,7 @@ MonoBehaviour:
   ball: {fileID: 466907353}
   ballRb: {fileID: 466907349}
   aiPaddle: {fileID: 1969875951}
+  referee: {fileID: 0}
   aiSpeed: 5
   errorMargin: 0.082
   missProbability: 0.1
@@ -5355,6 +5415,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaddleFlickController
   flickMultiplier: 1.52
+  baseHitSpeed: 8
+  maxHitSpeed: 15
   aimAssistStrength: 0.2
   targetPoint: {fileID: 1140111322}
   ballTag: Ball
@@ -5716,6 +5778,7 @@ Transform:
   - {fileID: 1869427646}
   - {fileID: 791264615}
   - {fileID: 1633583144}
+  - {fileID: 1192105589}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1633583143
@@ -5811,6 +5874,37 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1035790433963668018, guid: 085ce58b196caa446a8545c9dd388793, type: 3}
   m_PrefabInstance: {fileID: 1556058166}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1756820362
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1756820363}
+  m_Layer: 0
+  m_Name: Ball Spawn Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1756820363
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756820362}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.33973, y: 0.993, z: 0.095}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1761353997
 GameObject:
   m_ObjectHideFlags: 0
@@ -6443,7 +6537,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1893337271}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 166afcbe12f0bd04dba114323184c408, type: 3}
   m_Name: 
@@ -6452,6 +6546,8 @@ MonoBehaviour:
   statusText: {fileID: 2106701806}
   pointsToWin: 11
   pointsToWinBy: 2
+  ballController: {fileID: 466907354}
+  floatSpawnPoint: {fileID: 1756820363}
 --- !u!1001 &1906405250
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6873,6 +6969,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaddleFlickController
   flickMultiplier: 1.52
+  baseHitSpeed: 8
+  maxHitSpeed: 15
   aimAssistStrength: 0.2
   targetPoint: {fileID: 1920804850}
   ballTag: Ball
@@ -7314,3 +7412,4 @@ SceneRoots:
   - {fileID: 2135536700}
   - {fileID: 581900400}
   - {fileID: 1195680530}
+  - {fileID: 1756820363}

@@ -11,6 +11,11 @@ public class MatchReferee : MonoBehaviour
     public int pointsToWin = 11;
     public int pointsToWinBy = 2;
 
+    [Header("Pelota y Saque")]
+    public BallController ballController;
+    [Tooltip("Punto donde flotará la pelota al resetear (opcional)")]
+    public Transform floatSpawnPoint;
+
     // Estado del Marcador
     private int playerScore = 0;
     private int aiScore = 0;
@@ -27,7 +32,12 @@ public class MatchReferee : MonoBehaviour
     void Start()
     {
         UpdateUI();
+        ResetPlayState(); // Asegurar que la pelota flote al iniciar
     }
+
+    // --- MÉTODOS PÚBLICOS DE ESTADO ---
+    public bool GetIsPlayerTurnToServe() { return isPlayerTurnToServe; }
+    public bool GetIsServePhase() { return isServePhase; }
 
     // --- LÓGICA DE PALAS ---
     public void OnBallHitPaddle(Hitter hitter)
@@ -54,6 +64,12 @@ public class MatchReferee : MonoBehaviour
         bouncesOnAISide = 0;
         touchedNet = false;
         isServePhase = false; 
+
+        // Bloquear el agarre manual de la pelota mientras esté en juego
+        if (ballController != null)
+        {
+            ballController.SetGrabbable(false);
+        }
     }
 
     // --- LÓGICA DE MESA ---
@@ -154,8 +170,13 @@ public class MatchReferee : MonoBehaviour
         touchedNet = false;
         isServePhase = true;
 
-        // Opcional: Detener la pelota físicamente para preparar el siguiente saque
-        // ballRigidbody.linearVelocity = Vector3.zero;
+        if (ballController != null)
+        {
+            Vector3? spawnPos = floatSpawnPoint != null ? floatSpawnPoint.position : (Vector3?)null;
+            ballController.ResetAndFloat(spawnPos);
+            // Permitir que el jugador vuelva a agarrar la pelota para el saque
+            ballController.SetGrabbable(true);
+        }
     }
 
     private void UpdateUI()

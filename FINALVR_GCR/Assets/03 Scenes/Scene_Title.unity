@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3912c467d16515d4c835ab4ca4e104d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TitleScreenManager
-  mainSceneName: SampleScene
+  mainSceneName: Practice_Bot_Scene
   promptText: {fileID: 163849789}
   pulseSpeed: 1.5
   leftTrigger: {fileID: -5982496924579745919, guid: c348712bda248c246b8c49b3db54643f, type: 3}
@@ -1061,6 +1061,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaddleFlickController
   flickMultiplier: 1.52
+  baseHitSpeed: 8
+  maxHitSpeed: 15
   aimAssistStrength: 0.2
   targetPoint: {fileID: 0}
   ballTag: Ball
@@ -1564,7 +1566,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8806329115733545878, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.317
+      value: 1.086
       objectReference: {fileID: 0}
     - target: {fileID: 8806329115733545878, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2232,6 +2234,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaddleFlickController
   flickMultiplier: 1.52
+  baseHitSpeed: 8
+  maxHitSpeed: 15
   aimAssistStrength: 0.2
   targetPoint: {fileID: 0}
   ballTag: Ball

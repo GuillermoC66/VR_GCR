@@ -138,7 +138,7 @@ public class BallLauncherRobot : MonoBehaviour
             
             // 2. Obtener la rotación actual para modificar Z
             Vector3 currentRotation = transform.localEulerAngles;
-            currentRotation.x = 90f; // Mantener la inclinación frontal en 0 (solo rota en Y y Z)
+            currentRotation.x = 0f; // Mantener la inclinación frontal en 0 (solo rota en Y y Z)
             
             // Conectar el arco directamente al eje Z (en grados)
             if(selectedShot.upwardArc>=0 && selectedShot.upwardArc<=45)

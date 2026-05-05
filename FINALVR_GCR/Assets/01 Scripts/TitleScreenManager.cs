@@ -8,7 +8,7 @@ public class TitleScreenManager : MonoBehaviour
 {
     [Header("Configuración de Escena")]
     [Tooltip("El nombre exacto de tu escena principal del juego")]
-    public string mainSceneName = "SampleScene"; 
+    public string mainSceneName = "Practice_Bot_Scene"; 
 
     [Header("Efectos Visuales")]
     [Tooltip("El texto que dice 'Presiona el gatillo para comenzar'")]

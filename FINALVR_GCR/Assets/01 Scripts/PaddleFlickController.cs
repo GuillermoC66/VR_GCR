@@ -15,6 +15,12 @@ public class PaddleFlickController : MonoBehaviour
     [Tooltip("0 = Física pura (Difícil). 1 = Apuntado automático (Fácil). Usa 0.1 o 0.2 para un toque sutil.")]
     [Range(0f, 1f)]
     [SerializeField] private float aimAssistStrength = 0.2f;
+
+    // Propiedades públicas para que el PowerManager pueda modificarlos
+    public float AimAssistStrength { get => aimAssistStrength; set => aimAssistStrength = value; }
+    public float BaseHitSpeed { get => baseHitSpeed; set => baseHitSpeed = value; }
+    public float MaxHitSpeed { get => maxHitSpeed; set => maxHitSpeed = value; }
+
     
     [Tooltip("El objeto vacío en la mesa hacia donde la pelota intentará ir.")]
     public Transform targetPoint; 

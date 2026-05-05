@@ -8,10 +8,10 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
-  m_EditorHideFlags: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 12004, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.ContainerWindow
   m_PixelRect:
     serializedVersion: 2
     x: 1098.2858
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 112}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 58
+  controlID: 228
   draggingID: 0
 --- !u!114 &3
 MonoBehaviour:
@@ -224,7 +224,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 112}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 59
+  controlID: 229
   draggingID: 0
 --- !u!114 &10
 MonoBehaviour:
@@ -250,7 +250,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 56}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 60
+  controlID: 230
   draggingID: 0
 --- !u!114 &11
 MonoBehaviour:
@@ -622,7 +622,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/03 Scenes
+    - Assets/Samples/XR Interaction Toolkit/3.3.0/Starter Assets
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -632,26 +632,25 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/03 Scenes
+  - Assets/Samples/XR Interaction Toolkit/3.3.0/Starter Assets
   m_LastFoldersGridSize: -1
   m_LastProjectPath: D:\artz pedregal\proyectos unity\VR_GCR\FINALVR_GCR
   m_LockTracker:
     m_IsLocked: 0
   m_LastLocalAssetsSearchArea: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 0}
+    scrollPos: {x: 0, y: 21.428589}
     m_SelectedIDs:
-    - m_Data: 76934
+    - m_Data: 81966
     m_LastClickedID:
-      m_Data: 76934
+      m_Data: 81966
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 65430
-    - m_Data: 65432
-    - m_Data: 65434
-    - m_Data: 65436
-    - m_Data: 65438
-    - m_Data: 76932
+    - m_Data: 59124
+    - m_Data: 59128
+    - m_Data: 59130
+    - m_Data: 59132
+    - m_Data: 59134
     - m_Data: 1000000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -685,11 +684,7 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 65430
-    - m_Data: 65432
-    - m_Data: 65434
-    - m_Data: 65436
-    - m_Data: 65438
+    - m_Data: 1000000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -716,9 +711,10 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: []
-    m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 0
+    m_SelectedInstanceIDs:
+    - m_Data: 76906
+    m_LastClickedInstanceID: 76906
+    m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs:
     - m_Data: 76842
     - m_Data: 76858
@@ -802,7 +798,7 @@ MonoBehaviour:
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
   m_LastInspectedObjectInstanceID: -1
-  m_LastVerticalScrollValue: 0
+  m_LastVerticalScrollValue: 1259.4287
   m_GlobalObjectId: 
   m_InspectorMode: 0
   m_LockTracker:
@@ -848,16 +844,25 @@ MonoBehaviour:
     m_DynamicPanelBehavior: 0
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: []
+      scrollPos: {x: 0, y: 95.57141}
+      m_SelectedIDs:
+      - m_Data: 76906
       m_LastClickedID:
-        m_Data: 0
+        m_Data: 76906
       m_ExpandedIDs:
-      - m_Data: -1324
+      - m_Data: -5020
+      - m_Data: -4928
+      - m_Data: -4488
+      - m_Data: -4352
+      - m_Data: -4338
+      - m_Data: -4126
+      - m_Data: -3270
+      - m_Data: 77228
+      - m_Data: 77240
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: XR Origin Hands (XR Rig)
-        m_OriginalName: XR Origin Hands (XR Rig)
+        m_Name: 
+        m_OriginalName: 
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
@@ -865,10 +870,10 @@ MonoBehaviour:
           width: 0
           height: 0
         m_UserData:
-          m_Data: -1764
+          m_Data: 0
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 0
+        m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_TrimLeadingAndTrailingWhitespace: 0
         m_ClientGUIView: {fileID: 4}
@@ -1209,7 +1214,7 @@ MonoBehaviour:
       sizeOverridden: 0
     - dockPosition: 1
       containerId: overlay-container--right
-      displayed: 0
+      displayed: 1
       id: Scene View/TrailRenderer
       index: 9
       contents: '{"m_Layout":4,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":48.0,"y":48.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
@@ -1432,9 +1437,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 1.2801206, y: 1.5772983, z: 0.24651498}
+    m_Target: {x: -2.5586336, y: 1.5428208, z: -0.3357514}
     speed: 2
-    m_Value: {x: 1.2801206, y: 1.5772983, z: 0.24651498}
+    m_Value: {x: -2.5586336, y: 1.5428208, z: -0.3357514}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1464,7 +1469,7 @@ MonoBehaviour:
       m_Fade:
         m_Target: 0
         speed: 2
-        m_Value: 1
+        m_Value: 0
       m_Color: {r: 0.5, g: 0.5, b: 0.5, a: 0.4}
       m_Pivot: {x: 0, y: 0, z: 0}
       m_Size: {x: 1, y: 1}
@@ -1482,11 +1487,11 @@ MonoBehaviour:
   m_Rotation:
     m_Target: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
     speed: 2
-    m_Value: {x: 0.00000015289186, y: 0.7071067, z: 0, w: 0.7071069}
+    m_Value: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_Size:
-    m_Target: 0.63366914
+    m_Target: 0.97181946
     speed: 2
-    m_Value: 0.6635279
+    m_Value: 0.97181946
   m_Ortho:
     m_Target: 1
     speed: 2

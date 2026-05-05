@@ -12,7 +12,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
+  companyName: GuillermoCarrillo
   productName: FINALVR_GCR
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
@@ -151,7 +151,7 @@ PlayerSettings:
   tvOSBundleVersion: 1.0
   bundleVersion: 9.2.1
   preloadedAssets:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 67932118c7c0fc142be2658c7cdce202, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -173,7 +173,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.4
   androidMinAspectRatio: 1
   applicationIdentifier:
-    Android: com.DefaultCompany.VRTemplate
+    Android: com.GuillermoCarrillo.FINALVR_GCR
     Standalone: com.Default-Company.VR-Template
     VisionOS: com.Default-Company.VR-Template
     iPhone: com.Default-Company.VR-Template
@@ -182,7 +182,7 @@ PlayerSettings:
     VisionOS: 0
     iPhone: 0
     tvOS: 0
-  overrideDefaultApplicationIdentifier: 1
+  overrideDefaultApplicationIdentifier: 0
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 32
   AndroidTargetSdkVersion: 34

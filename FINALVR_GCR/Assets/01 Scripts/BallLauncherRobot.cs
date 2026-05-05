@@ -131,19 +131,14 @@ public class BallLauncherRobot : MonoBehaviour
             ballRb.angularVelocity = Vector3.zero; 
             
             // --- ACTUALIZACIÓN VISUAL DEL ROBOT ---
-            // 1. Mirar hacia el objetivo en la mesa
-            transform.LookAt(selectedShot.targetPoint);
+            // 1. Mirar hacia el objetivo SOLO en el eje Y (para que no se incline hacia abajo)
+            Vector3 lookPos = selectedShot.targetPoint.position;
+            lookPos.y = transform.position.y; // Ignoramos la altura del target
+            transform.LookAt(lookPos);
             
-            // 2. Transformar la rotación (Clamp en Y, y Z conectado directo al arco)
+            // 2. Obtener la rotación actual para modificar Z
             Vector3 currentRotation = transform.localEulerAngles;
-            
-            // Normalizar Y a -180..180 para el Clamp
-            float yRot = currentRotation.y;
-            if (yRot > 180f) yRot -= 360f;
-            
-            // Limitar Y a máximo 20 y mínimo -20
-            yRot = Mathf.Clamp(yRot, -20f, 20f);
-            currentRotation.y = yRot;
+            currentRotation.x = 90f; // Mantener la inclinación frontal en 0 (solo rota en Y y Z)
             
             // Conectar el arco directamente al eje Z (en grados)
             if(selectedShot.upwardArc>=0 && selectedShot.upwardArc<=45)

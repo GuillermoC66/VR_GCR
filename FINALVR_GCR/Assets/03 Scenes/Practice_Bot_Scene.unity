@@ -737,19 +737,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 617627289}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!134 &174388102
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: TableSurface
-  serializedVersion: 2
-  m_DynamicFriction: 0.35
-  m_StaticFriction: 0.4
-  m_Bounciness: 0.85
-  m_FrictionCombine: 0
-  m_BounceCombine: 3
 --- !u!1 &177343300
 GameObject:
   m_ObjectHideFlags: 0
@@ -859,8 +846,8 @@ Transform:
   m_GameObject: {fileID: 177343300}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.3, y: 1.44, z: 0.077}
-  m_LocalScale: {x: 0.46, y: 0.46, z: 0.46}
+  m_LocalPosition: {x: 1.3084, y: 1.324, z: 0.077}
+  m_LocalScale: {x: 0.50264275, y: 0.0859801, z: 0.46}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -918,17 +905,17 @@ MonoBehaviour:
   - shotName: DROP IZQ
     isEnabled: 1
     targetPoint: {fileID: 895163008}
-    speed: 3.7
+    speed: 3.8
     upwardArc: 65
   - shotName: DROP DER
     isEnabled: 1
     targetPoint: {fileID: 88641646}
-    speed: 3.7
+    speed: 3.8
     upwardArc: 65
   - shotName: DROP CEN
     isEnabled: 1
     targetPoint: {fileID: 133081569}
-    speed: 3.7
+    speed: 3.8
     upwardArc: 65
 --- !u!1001 &244947815
 PrefabInstance:
@@ -1434,6 +1421,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!134 &310509932
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: TableSurface
+  serializedVersion: 2
+  m_DynamicFriction: 0.35
+  m_StaticFriction: 0.4
+  m_Bounciness: 0.85
+  m_FrictionCombine: 0
+  m_BounceCombine: 3
 --- !u!1 &327713972
 GameObject:
   m_ObjectHideFlags: 0
@@ -2498,7 +2498,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 470067611}
-  m_Material: {fileID: 174388102}
+  m_Material: {fileID: 310509932}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -5696,7 +5696,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8806329115733545878, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.943
+      value: -2.234
       objectReference: {fileID: 0}
     - target: {fileID: 8806329115733545878, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       propertyPath: m_LocalPosition.y
@@ -7208,6 +7208,14 @@ PrefabInstance:
     - target: {fileID: 6671928872248203890, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
       propertyPath: maxVelocity
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6671928872248203890, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
+      propertyPath: arcadeBounciness
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6671928872248203890, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
+      propertyPath: useArcadePhysics
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

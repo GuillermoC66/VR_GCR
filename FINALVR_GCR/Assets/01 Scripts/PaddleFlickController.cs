@@ -15,9 +15,12 @@ public class PaddleFlickController : MonoBehaviour
     [Tooltip("0 = Física pura (Difícil). 1 = Apuntado automático (Fácil). Usa 0.1 o 0.2 para un toque sutil.")]
     [Range(0f, 1f)]
     [SerializeField] private float aimAssistStrength = 0.2f;
+    [Tooltip("Elevación artificial para crear una parábola y asegurar que la pelota pase la red.")]
+    [SerializeField] private float upwardBoost = 0.2f;
 
     // Propiedades públicas para que el PowerManager pueda modificarlos
     public float AimAssistStrength { get => aimAssistStrength; set => aimAssistStrength = value; }
+    public float UpwardBoost { get => upwardBoost; set => upwardBoost = value; }
     public float BaseHitSpeed { get => baseHitSpeed; set => baseHitSpeed = value; }
     public float MaxHitSpeed { get => maxHitSpeed; set => maxHitSpeed = value; }
 
@@ -70,12 +73,17 @@ public class PaddleFlickController : MonoBehaviour
                     // 2. Vector Ideal (Hacia el objetivo)
                     Vector3 idealDirection = rawDirection; // Por defecto es igual al real
                     
-                    // Solo asistimos si tenemos un objetivo asignado y la pelota va hacia adelante
                     if (targetPoint != null)
                     {
                         Vector3 dirToTarget = (targetPoint.position - ballRb.position).normalized;
-                        // Opcional: Solo asistir si el golpe tiene una dirección medianamente correcta (hacia la red)
-                        if (Vector3.Dot(rawDirection, dirToTarget) > 0f) 
+                        
+                        // Si la asistencia está al máximo (Super Golpe), forzamos que vaya al objetivo sin importar cómo pegue
+                        if (aimAssistStrength >= 1f)
+                        {
+                            idealDirection = dirToTarget;
+                        }
+                        // De lo contrario, solo asistimos si el golpe tiene una dirección medianamente correcta (hacia adelante)
+                        else if (Vector3.Dot(rawDirection, dirToTarget) > 0f) 
                         {
                             idealDirection = dirToTarget;
                         }
@@ -83,6 +91,9 @@ public class PaddleFlickController : MonoBehaviour
 
                     // 3. Mezclar los vectores (Magia del Aim Assist)
                     Vector3 finalDirection = Vector3.Lerp(rawDirection, idealDirection, aimAssistStrength).normalized;
+
+                    // 3.5 Añadir la parábola artificial hacia arriba
+                    finalDirection = (finalDirection + Vector3.up * upwardBoost).normalized;
 
                     // 4. Calcular velocidad de salida estilo Arcade
                     float rawSpeed = pointVelocity.magnitude * flickMultiplier;

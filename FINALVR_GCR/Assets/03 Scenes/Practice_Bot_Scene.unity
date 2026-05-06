@@ -917,6 +917,19 @@ MonoBehaviour:
     targetPoint: {fileID: 133081569}
     speed: 4.3
     upwardArc: 65
+--- !u!134 &232603086
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: TableSurface
+  serializedVersion: 2
+  m_DynamicFriction: 0.35
+  m_StaticFriction: 0.4
+  m_Bounciness: 0.85
+  m_FrictionCombine: 0
+  m_BounceCombine: 3
 --- !u!1001 &244947815
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1415,7 +1428,7 @@ Transform:
   m_GameObject: {fileID: 280702462}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.62, y: 0.76, z: 0.08}
+  m_LocalPosition: {x: 0.62, y: 0.82, z: 0.08}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2485,7 +2498,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 470067611}
-  m_Material: {fileID: 1711836007}
+  m_Material: {fileID: 232603086}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -5436,6 +5449,8 @@ MonoBehaviour:
   superHitColor: {r: 1, g: 0, b: 0, a: 1}
   powerReadyParticles: {fileID: 0}
   powerTrail: {fileID: 5918560028112742275}
+  audioSource: {fileID: 0}
+  powerHitSound: {fileID: 0}
 --- !u!1001 &1251924254
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6821,19 +6836,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 617627289}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!134 &1711836007
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: TableSurface
-  serializedVersion: 2
-  m_DynamicFriction: 0.35
-  m_StaticFriction: 0.4
-  m_Bounciness: 0.85
-  m_FrictionCombine: 0
-  m_BounceCombine: 3
 --- !u!1 &1850956154
 GameObject:
   m_ObjectHideFlags: 0
@@ -7020,6 +7022,103 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 437862dbfc5106c48b3acb5df4890f24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BallController
+--- !u!82 &1968269541
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968269539}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 1
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 0.58153
+  MaxDistance: 40
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &2014584546
 GameObject:
   m_ObjectHideFlags: 0
@@ -7249,10 +7348,33 @@ PrefabInstance:
       propertyPath: useArcadePhysics
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6797435704215152507, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
+      propertyPath: audioSource
+      value: 
+      objectReference: {fileID: 1968269541}
+    - target: {fileID: 6797435704215152507, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
+      propertyPath: wallHitSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 92410ded8aec237479e7ec23cc4dee16, type: 3}
+    - target: {fileID: 6797435704215152507, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
+      propertyPath: floorHitSound
+      value: 
+      objectReference: {fileID: 8300000, guid: dd3f19ed5eec1a849975380171587273, type: 3}
+    - target: {fileID: 6797435704215152507, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
+      propertyPath: tableHitSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 1ec5227c763f1e440b7303ad5175f69d, type: 3}
+    - target: {fileID: 6797435704215152507, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
+      propertyPath: paddleHitSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 62f5d26bf54bc744b9d2649d96f8adb8, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4561965163102726672, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1968269541}
   m_SourcePrefab: {fileID: 100100000, guid: c26ec02c2f9ce4c4a8de19dd4d7016eb, type: 3}
 --- !u!1001 &5918560028112742272
 PrefabInstance:
@@ -7345,7 +7467,7 @@ MonoBehaviour:
   powers: []
   selectedPower: 0
   superHitSpeed: 15
-  superHitAimAssist: 1
+  superHitAimAssist: 3
   activatePowerInput: {fileID: 83097790271614945, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   powerMeterText: {fileID: 0}
   powerMeterSlider: {fileID: 0}
@@ -7353,6 +7475,8 @@ MonoBehaviour:
   superHitColor: {r: 1, g: 0, b: 0, a: 1}
   powerReadyParticles: {fileID: 0}
   powerTrail: {fileID: 5918560028112742275}
+  audioSource: {fileID: 0}
+  powerHitSound: {fileID: 0}
 --- !u!96 &5918560028112742275
 TrailRenderer:
   serializedVersion: 4
@@ -7402,7 +7526,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Time: 5
+  m_Time: 1
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3

@@ -59,6 +59,11 @@ public class PowerManager : MonoBehaviour
     [Tooltip("Estela (TrailRenderer) que se activará durante el Super Golpe.")]
     public TrailRenderer powerTrail;
 
+    [Header("Efectos de Sonido (Opcionales)")]
+    public AudioSource audioSource;
+    [Tooltip("Sonido que se reproduce cuando golpeas la pelota con el poder activo.")]
+    public AudioClip powerHitSound;
+
     // Estado interno
     private bool isPowerActive = false;
     private PaddleFlickController paddle;
@@ -127,6 +132,12 @@ public class PowerManager : MonoBehaviour
     {
         if (isPowerActive)
         {
+            // Reproducir sonido especial de poder (si está asignado)
+            if (audioSource != null && powerHitSound != null)
+            {
+                audioSource.PlayOneShot(powerHitSound);
+            }
+
             // El poder ya estaba activo en este golpe, lo consumimos
             DeactivatePower();
             return;

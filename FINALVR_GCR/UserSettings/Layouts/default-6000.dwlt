@@ -48,7 +48,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 112}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 228
+  controlID: 129
   draggingID: 0
 --- !u!114 &3
 MonoBehaviour:
@@ -69,8 +69,8 @@ MonoBehaviour:
     y: 0
     width: 296.00006
     height: 1080
-  m_MinSize: {x: 276, y: 76}
-  m_MaxSize: {x: 4001, y: 4026}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -95,8 +95,8 @@ MonoBehaviour:
     y: 0
     width: 328
     height: 639.4286
-  m_MinSize: {x: 201, y: 226}
-  m_MaxSize: {x: 4001, y: 4026}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 15}
   m_Panes:
   - {fileID: 15}
@@ -224,7 +224,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 112}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 229
+  controlID: 59
   draggingID: 0
 --- !u!114 &10
 MonoBehaviour:
@@ -250,7 +250,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 56}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 230
+  controlID: 60
   draggingID: 0
 --- !u!114 &11
 MonoBehaviour:
@@ -622,7 +622,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Samples/XR Interaction Toolkit/3.3.0/Starter Assets
+    - Assets/04 Audio/FX
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -632,7 +632,7 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Samples/XR Interaction Toolkit/3.3.0/Starter Assets
+  - Assets/04 Audio/FX
   m_LastFoldersGridSize: -1
   m_LastProjectPath: D:\artz pedregal\proyectos unity\VR_GCR\FINALVR_GCR
   m_LockTracker:
@@ -641,16 +641,17 @@ MonoBehaviour:
   m_FolderTreeState:
     scrollPos: {x: 0, y: 21.428589}
     m_SelectedIDs:
-    - m_Data: 81966
+    - m_Data: 74700
     m_LastClickedID:
-      m_Data: 81966
+      m_Data: 74700
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 59124
-    - m_Data: 59128
-    - m_Data: 59130
-    - m_Data: 59132
-    - m_Data: 59134
+    - m_Data: 65448
+    - m_Data: 65450
+    - m_Data: 65452
+    - m_Data: 65454
+    - m_Data: 67088
+    - m_Data: 67102
     - m_Data: 1000000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -684,7 +685,10 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 1000000000
+    - m_Data: 65448
+    - m_Data: 65450
+    - m_Data: 65452
+    - m_Data: 65454
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -712,8 +716,8 @@ MonoBehaviour:
       m_ResourceFile: 
   m_ListAreaState:
     m_SelectedInstanceIDs:
-    - m_Data: 76906
-    m_LastClickedInstanceID: 76906
+    - m_Data: 81084
+    m_LastClickedInstanceID: 81084
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs:
     - m_Data: 76842
@@ -798,7 +802,7 @@ MonoBehaviour:
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
   m_LastInspectedObjectInstanceID: -1
-  m_LastVerticalScrollValue: 1259.4287
+  m_LastVerticalScrollValue: 0
   m_GlobalObjectId: 
   m_InspectorMode: 0
   m_LockTracker:
@@ -844,21 +848,25 @@ MonoBehaviour:
     m_DynamicPanelBehavior: 0
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 95.57141}
+      scrollPos: {x: 0, y: 0}
       m_SelectedIDs:
-      - m_Data: 76906
+      - m_Data: 81084
       m_LastClickedID:
-        m_Data: 76906
+        m_Data: 81084
       m_ExpandedIDs:
-      - m_Data: -5020
-      - m_Data: -4928
-      - m_Data: -4488
-      - m_Data: -4352
-      - m_Data: -4338
-      - m_Data: -4126
-      - m_Data: -3270
-      - m_Data: 77228
-      - m_Data: 77240
+      - m_Data: -77896
+      - m_Data: -77648
+      - m_Data: -72148
+      - m_Data: -69872
+      - m_Data: -2508
+      - m_Data: -2416
+      - m_Data: -1840
+      - m_Data: -1826
+      - m_Data: -1324
+      - m_Data: 59520
+      - m_Data: 59526
+      - m_Data: 59784
+      - m_Data: 59950
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1214,7 +1222,7 @@ MonoBehaviour:
       sizeOverridden: 0
     - dockPosition: 1
       containerId: overlay-container--right
-      displayed: 1
+      displayed: 0
       id: Scene View/TrailRenderer
       index: 9
       contents: '{"m_Layout":4,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":48.0,"y":48.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
@@ -1437,9 +1445,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: -2.5586336, y: 1.5428208, z: -0.3357514}
+    m_Target: {x: -1.6503618, y: 1.3338825, z: -0.3357514}
     speed: 2
-    m_Value: {x: -2.5586336, y: 1.5428208, z: -0.3357514}
+    m_Value: {x: -1.6503618, y: 1.3338825, z: -0.3357514}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1459,9 +1467,9 @@ MonoBehaviour:
   m_Grid:
     xGrid:
       m_Fade:
-        m_Target: 1
+        m_Target: 0
         speed: 2
-        m_Value: 1
+        m_Value: 0
       m_Color: {r: 0.5, g: 0.5, b: 0.5, a: 0.4}
       m_Pivot: {x: 0, y: 0, z: 0}
       m_Size: {x: 1, y: 1}
@@ -1475,9 +1483,9 @@ MonoBehaviour:
       m_Size: {x: 1, y: 1}
     zGrid:
       m_Fade:
-        m_Target: 0
+        m_Target: 1
         speed: 2
-        m_Value: 0
+        m_Value: 1
       m_Color: {r: 0.5, g: 0.5, b: 0.5, a: 0.4}
       m_Pivot: {x: 0, y: 0, z: 0}
       m_Size: {x: 1, y: 1}
@@ -1485,13 +1493,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+    m_Target: {x: 0, y: 1, z: 0, w: 0}
     speed: 2
-    m_Value: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+    m_Value: {x: 0, y: 1, z: 0, w: 0}
   m_Size:
-    m_Target: 0.97181946
+    m_Target: 1.2495396
     speed: 2
-    m_Value: 0.97181946
+    m_Value: 1.1957316
   m_Ortho:
     m_Target: 1
     speed: 2

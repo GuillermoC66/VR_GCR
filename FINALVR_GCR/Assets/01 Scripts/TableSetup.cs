@@ -9,7 +9,7 @@ public class TableSetup : MonoBehaviour
 {
     [Header("Table Dimensions (metres)")]
     [Tooltip("Standard ping pong table: 2.74m long, 1.525m wide, 0.76m tall")]
-    public Vector3 tableDimensions = new Vector3(2.74f, 0.76f, 1.525f);
+    public Vector3 tableDimensions = new Vector3(2.74f, 0.74f, 1.525f);
 
     [Header("Physics")]
     public float bounciness = 0.85f;       // how bouncy the surface is (0–1)
@@ -74,7 +74,7 @@ public class TableSetup : MonoBehaviour
         AddBoxCollider(
             gameObject,
             name: "Collider_Surface",
-            center: new Vector3(-0.333f, tableDimensions.y, 2.168f),       // top of table
+            center: new Vector3(-0.333f, 0.74f, 2.168f),       // top of table
             size: new Vector3(tableDimensions.x, 0.04f, tableDimensions.z)  // thin slab
         );
 

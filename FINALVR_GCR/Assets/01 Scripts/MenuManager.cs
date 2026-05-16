@@ -20,6 +20,13 @@ public class MenuManager : MonoBehaviour
     public GameObject rightControllerModel; // Opcional: para ocultar el modelo del controlador si el jugador es zurdo
     public GameObject leftControllerModel;  // Opcional: para ocultar el modelo del controlador si el jugador es zurdo
 
+    [Header("Configuración de Audio")]
+    [Tooltip("Arrastra aquí el AudioSource que reproduce tu música de fondo")]
+    public AudioSource backgroundMusic;
+    
+    // Variable estática para que la pelota y la pala puedan leer el volumen de los efectos
+    public static float sfxVolume = 1f;
+
     [Header("Configuración de Altura (NUEVO)")]
     [Tooltip("El objeto 'Camera Offset' dentro de tu XR Origin")]
     public Transform cameraOffset;
@@ -82,11 +89,19 @@ public class MenuManager : MonoBehaviour
         mainMenuPanel.SetActive(true);
     }
 
-    // 3. VolumeSlider
+    // 3. VolumeSlider (Música)
     public void SetVolume(float volume)
     {
-        // AudioListener controla el volumen global de Unity (va de 0.0 a 1.0)
-        AudioListener.volume = volume;
+        if (backgroundMusic != null)
+        {
+            backgroundMusic.volume = volume;
+        }
+    }
+
+    // Nuevo Slider (Efectos de Sonido - SFX)
+    public void SetSFXVolume(float volume)
+    {
+        sfxVolume = volume;
     }
 
     // 4. Lst_Toggle (Lefty)

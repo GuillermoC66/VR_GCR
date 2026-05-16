@@ -132,10 +132,10 @@ public class PowerManager : MonoBehaviour
     {
         if (isPowerActive)
         {
-            // Reproducir sonido especial de poder (si está asignado)
+            // Reproducir sonido especial de poder (si está asignado) multiplicado por el volumen SFX
             if (audioSource != null && powerHitSound != null)
             {
-                audioSource.PlayOneShot(powerHitSound);
+                audioSource.PlayOneShot(powerHitSound, MenuManager.sfxVolume);
             }
 
             // El poder ya estaba activo en este golpe, lo consumimos

@@ -17,7 +17,7 @@ public class RobotShot
     [Tooltip("Velocidad lineal del tiro")]
     public float speed = 10f;
     
-    [Tooltip("Ángulo en grados (0 a 90) que tendrá el tiro hacia arriba. Afecta tanto al tiro físico como a la rotación Z visual del robot.")]
+    [Tooltip("Ángulo en grados (0 a 90) que tendrá el tiro hacia arriba. Afecta al tiro físico de la pelota.")]
     [Range(0f, 90f)]
     public float upwardArc = 15f;
 }
@@ -30,6 +30,40 @@ public class BallLauncherRobot : MonoBehaviour
     
     [Tooltip("Referencia a la pelota (se re-utilizará para evitar sobrecargar memoria)")]
     public BallController ball;
+    
+    [Tooltip("Objeto 3D que rotará hacia la dirección de lanzamiento (eje +X apuntará hacia el objetivo)")]
+    public Transform visualModel;
+
+    [Header("Ajuste Visual del Modelo")]
+    [Tooltip("Ajuste de posición X (Izquierda/Derecha) para alinear el modelo con la pelota")]
+    [Range(-1f, 1f)]
+    public float modelOffsetX = 0f;
+
+    [Tooltip("Ajuste de posición Z (Adelante/Atrás) para alinear el modelo con la pelota")]
+    [Range(-1f, 1f)]
+    public float modelOffsetZ = 0f;
+
+    [Tooltip("Ajuste de posición Y (Arriba/Abajo) para alinear el modelo con la pelota")]
+    [Range(-1f, 1f)]
+    public float modelOffsetY = 0f;
+    
+    [Header("Animación")]
+    [Tooltip("El Animator del modelo visual (arrastra el objeto que tiene el Animator aquí)")]
+    public Animator robotAnimator;
+    
+    [Tooltip("Nombre del parámetro tipo Trigger en el Animator para reproducir el tiro")]
+    public string shootTriggerName = "Shoot";
+
+    [Tooltip("Tiempo en segundos que tarda la animación en disparar físicamente la pelota")]
+    public float animationDelay = 0.5f;
+
+    [Header("Sonido")]
+    [Tooltip("El sonido que se reproducirá al iniciar la animación de disparo")]
+    public AudioClip shootSound;
+    
+    [Tooltip("El AudioSource que reproducirá el sonido. Si lo dejas vacío, el script buscará uno automáticamente en este mismo objeto.")]
+    public AudioSource audioSource;
+
     [Header("Modo Automático")]
     [Tooltip("Si está activo, el robot lanzará pelotas automáticamente en un bucle infinito.")]
     public bool isAutoMode = true;
@@ -42,6 +76,15 @@ public class BallLauncherRobot : MonoBehaviour
     public List<RobotShot> availableShots = new List<RobotShot>();
 
     private Coroutine launchCoroutine;
+
+    void Awake()
+    {
+        // Si el usuario olvidó asignar un AudioSource, tratamos de encontrar uno en el mismo objeto
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+    }
 
     void OnEnable()
     {
@@ -81,10 +124,15 @@ public class BallLauncherRobot : MonoBehaviour
     [ContextMenu("Forzar Lanzamiento Manual (Test)")]
     public void LaunchBall()
     {
+        StartCoroutine(LaunchSequence());
+    }
+
+    private IEnumerator LaunchSequence()
+    {
         if (ball == null) 
         {
             Debug.LogWarning("El robot no tiene una pelota asignada.");
-            return;
+            yield break;
         }
 
         // 1. Elegir posición de lanzamiento al azar para cambiar de lugar
@@ -94,7 +142,8 @@ public class BallLauncherRobot : MonoBehaviour
             launchPos = launchPositions[Random.Range(0, launchPositions.Length)];
             
             // Mover al robot físicamente a esa posición para que el jugador perciba el cambio
-            transform.position = launchPos.position;
+            // Aplicamos los sliders de offset para alinear la base del modelo
+            transform.position = launchPos.position + new Vector3(modelOffsetX, modelOffsetY, modelOffsetZ);
         }
 
         // 2. Elegir un tiro aleatorio habilitado
@@ -102,55 +151,69 @@ public class BallLauncherRobot : MonoBehaviour
         if (validShots.Count == 0)
         {
             Debug.LogWarning("El Robot no tiene tiros habilitados o les falta Target Point en el Inspector.");
-            return;
+            yield break;
         }
 
         RobotShot selectedShot = validShots[Random.Range(0, validShots.Count)];
 
-        // 3. Re-utilizar la pelota: esto hará que desaparezca de la mesa y se teletransporte al robot.
-        // Esto ahorra muchísima memoria y evita "basura" (garbage collection) comparado con Instanciar/Destruir.
+        // 3. Re-utilizar la pelota y ponerla en el cañón del robot
         ball.ResetAndFloat(launchPos.position);
 
-        // 4. Disparar
+        // 4. Apuntar visualmente el robot y calcular dirección física
+        Vector3 directionToTarget = (selectedShot.targetPoint.position - launchPos.position).normalized;
+        Vector3 rightAxis = Vector3.Cross(Vector3.up, directionToTarget).normalized;
+        Vector3 launchDirection = Quaternion.AngleAxis(-selectedShot.upwardArc, rightAxis) * directionToTarget;
+
+        if (visualModel != null)
+        {
+            Vector3 targetPosXZ = selectedShot.targetPoint.position;
+            targetPosXZ.y = visualModel.position.y; // Ignorar altura para Yaw
+            Vector3 directionXZ = (targetPosXZ - visualModel.position).normalized;
+
+            if (directionXZ != Vector3.zero)
+            {
+                visualModel.rotation = Quaternion.LookRotation(directionXZ) * Quaternion.Euler(0, 90, 0);
+                Vector3 currentLocalRot = visualModel.localEulerAngles;
+                currentLocalRot.z = -selectedShot.upwardArc;
+                visualModel.localEulerAngles = currentLocalRot;
+            }
+        }
+
+        // 5. Reproducir animación de disparo y sonido
+        if (robotAnimator != null && !string.IsNullOrEmpty(shootTriggerName))
+        {
+            robotAnimator.SetTrigger(shootTriggerName);
+        }
+
+        if (shootSound != null && audioSource != null)
+        {
+            if (MenuManager.sfxVolume <= 0f)
+            {
+                Debug.LogWarning("El sonido del robot se intentó reproducir, pero MenuManager.sfxVolume está en 0.");
+            }
+            
+            // Reproducimos el sonido utilizando tu variable de volumen global de SFX
+            audioSource.PlayOneShot(shootSound, MenuManager.sfxVolume);
+        }
+        else
+        {
+            if (shootSound == null) Debug.LogWarning("Falta asignar el 'Shoot Sound' en el Inspector del Robot.");
+            if (audioSource == null) Debug.LogWarning("El Robot no tiene un componente 'Audio Source'. Añádelo desde el Inspector.");
+        }
+
+        // 6. Esperar a que la animación llegue al punto exacto donde sale la pelota
+        if (animationDelay > 0f)
+        {
+            yield return new WaitForSeconds(animationDelay);
+        }
+
+        // 7. Aplicar fuerza física a la pelota (disparo real)
         Rigidbody ballRb = ball.GetComponent<Rigidbody>();
         if (ballRb != null)
         {
-            // ResetAndFloat apaga la gravedad, así que la reactivamos para el vuelo de la pelota
             ballRb.useGravity = true;
-
-            // Calcular dirección base hacia el objetivo
-            Vector3 directionToTarget = (selectedShot.targetPoint.position - launchPos.position).normalized;
-
-            // Rotar la dirección hacia arriba basándonos en los grados del upwardArc
-            // (Para que físicamente la pelota también haga el arco y no se estrelle en la red)
-            Vector3 rightAxis = Vector3.Cross(Vector3.up, directionToTarget).normalized;
-            Vector3 launchDirection = Quaternion.AngleAxis(-selectedShot.upwardArc, rightAxis) * directionToTarget;
-
-            // Aplicar la física arcade con la nueva dirección elevada
             ballRb.linearVelocity = launchDirection * selectedShot.speed;
             ballRb.angularVelocity = Vector3.zero; 
-            
-            // --- ACTUALIZACIÓN VISUAL DEL ROBOT ---
-            // 1. Mirar hacia el objetivo SOLO en el eje Y (para que no se incline hacia abajo)
-            Vector3 lookPos = selectedShot.targetPoint.position;
-            lookPos.y = transform.position.y; // Ignoramos la altura del target
-            transform.LookAt(lookPos);
-            
-            // 2. Obtener la rotación actual para modificar Z
-            Vector3 currentRotation = transform.localEulerAngles;
-            currentRotation.x = 0f; // Mantener la inclinación frontal en 0 (solo rota en Y y Z)
-            
-            // Conectar el arco directamente al eje Z (en grados)
-            if(selectedShot.upwardArc>=0 && selectedShot.upwardArc<=45)
-            {
-                currentRotation.z = 90;
-            }
-            else
-            {
-                currentRotation.z = selectedShot.upwardArc;
-            }
-            
-            transform.localEulerAngles = currentRotation;
         }
     }
 

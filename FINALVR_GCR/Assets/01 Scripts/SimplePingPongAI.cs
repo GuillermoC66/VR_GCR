@@ -23,6 +23,21 @@ public class SimplePingPongAI : MonoBehaviour
     [Tooltip("Distancia en X a la que la IA decide dar el 'golpe'")]
     public float strikeDistance = 0.6f;
 
+    [Header("Devolución Balística Determinista (Arcade)")]
+    [Tooltip("Usa BallController.LaunchBallistic para devolver bolas limpias y consistentes a la mesa del jugador.")]
+    public bool useDeterministicReturns = true;
+    [Tooltip("Centro de la mitad de la mesa del jugador. Si está vacío se busca por tag 'TablePlayer'.")]
+    public Transform playerTableTarget;
+    public float playerTableHalfWidth = 0.55f;
+    public float playerTableHalfLength = 0.45f;
+    public float netHeightAboveTable = 0.155f;
+    public float aiReturnFlightTimeMin = 0.48f;
+    public float aiReturnFlightTimeMax = 0.66f;
+    [Range(0f, 0.5f)]
+    public float aiSliceChance = 0.2f;
+    [Range(0f, 0.4f)]
+    public float aiSmashChance = 0.15f;
+
     private Vector3 startPosition;
     private Vector3 targetPosition;
     
@@ -34,6 +49,9 @@ public class SimplePingPongAI : MonoBehaviour
     // Para saber si la IA está del lado izquierdo (negativo) o derecho (positivo)
     private float sideMultiplier; 
     private bool isServing = false; // Estado para bloquear Update durante el saque
+    private float lastAiHitTime = -10f;
+    private BallController ballController;
+    private BallReporter ballReporter;
 
     void Start()
     {
@@ -43,6 +61,29 @@ public class SimplePingPongAI : MonoBehaviour
         // Determina hacia qué dirección debe "empujar" la pala al atacar
         // Si baselineX es negativo, empuja hacia positivo (hacia la red) y viceversa.
         sideMultiplier = (baselineX < 0) ? 1f : -1f;
+
+        if (ball != null)
+        {
+            ballController = ball.GetComponent<BallController>();
+            ballReporter = ball.GetComponent<BallReporter>();
+        }
+
+        if (playerTableTarget == null)
+        {
+            GameObject playerTable = GameObject.FindGameObjectWithTag("TablePlayer");
+            if (playerTable != null) playerTableTarget = playerTable.transform;
+        }
+
+        // En modo determinista evitamos que la pala de la IA meta rebotes PhysX antes de nuestra devolución balística
+        if (useDeterministicReturns && aiPaddle != null)
+        {
+            Collider[] aiCols = aiPaddle.GetComponentsInChildren<Collider>();
+            foreach (Collider col in aiCols)
+            {
+                if (col is MeshCollider mc && !mc.convex) mc.convex = true;
+                col.isTrigger = true;
+            }
+        }
     }
 
     void Update()
@@ -79,7 +120,16 @@ public class SimplePingPongAI : MonoBehaviour
             if (Mathf.Abs(ball.position.x - aiPaddle.position.x) < strikeDistance && !isMissingThisTurn)
             {
                 // Empuja la pala 0.4 metros hacia la red
-                targetPosition.x = baselineX + (0.4f * sideMultiplier); 
+                targetPosition.x = baselineX + (0.4f * sideMultiplier);
+
+                if (useDeterministicReturns && ballController != null && Time.time - lastAiHitTime > 0.35f)
+                {
+                    float distToBall = Vector3.Distance(aiPaddle.position, ball.position);
+                    if (distToBall < 0.32f)
+                    {
+                        ExecuteDeterministicAIReturn();
+                    }
+                }
             }
             else
             {
@@ -135,8 +185,15 @@ public class SimplePingPongAI : MonoBehaviour
         yield return new WaitForSeconds(0.6f); 
 
         // 3. El Toss (Lanzar la pelota un poco hacia arriba)
-        ballRb.useGravity = true;
-        ballRb.linearVelocity = new Vector3(0f, 1.8f, 0f);
+        if (bc != null)
+        {
+            bc.ReleaseForServe(new Vector3(0f, 1.8f, 0f));
+        }
+        else
+        {
+            ballRb.useGravity = true;
+            ballRb.linearVelocity = new Vector3(0f, 1.8f, 0f);
+        }
 
         // Esperamos a que la pelota suba y empiece a bajar un poco
         yield return new WaitForSeconds(0.35f);
@@ -152,20 +209,29 @@ public class SimplePingPongAI : MonoBehaviour
         // y el BallReporter registre el "OnCollisionEnter" con el EnemyPaddle.
         yield return new WaitForSeconds(0.05f);
 
-        // 5. Aplicar la trayectoria perfecta (Magia)
-        // Sobrescribimos la velocidad física resultante para garantizar un buen saque
+        // 5. Aplicar la trayectoria perfecta (Balística Determinista)
         bool willMiss = Random.value < (missProbability * 0.2f);
-        
-        if (!willMiss)
+
+        if (useDeterministicReturns && bc != null && playerTableTarget != null)
         {
-            // Saque exitoso: va hacia abajo para picar en su mesa, y con fuerza hacia adelante
-            // Calculamos un ligero ángulo en Z para que no vaya siempre recto
+            if (ballReporter != null) ballReporter.NotifyEnemyPaddleHit(0.65f);
+
+            Vector3 landing = playerTableTarget.position + new Vector3(
+                Random.Range(-playerTableHalfLength * 0.5f, playerTableHalfLength * 0.5f),
+                0f,
+                Random.Range(-playerTableHalfWidth * 0.7f, playerTableHalfWidth * 0.7f)
+            );
+            float netTopY = playerTableTarget.position.y + netHeightAboveTable;
+            float clearance = willMiss ? -0.05f : 0.24f;
+            bc.LaunchBallistic(landing, 0.58f, netTopY, clearance, ArcadeShotType.Drive, Vector3.zero);
+        }
+        else if (!willMiss)
+        {
             float randomAngZ = Random.Range(-0.8f, 0.8f);
             ballRb.linearVelocity = new Vector3(3.5f * sideMultiplier, -2.5f, randomAngZ);
         }
         else
         {
-            // Saque fallido a propósito: directo a la red o mesa muy cerca
             ballRb.linearVelocity = new Vector3(1.5f * sideMultiplier, -1.0f, 0f);
         }
 
@@ -175,5 +241,49 @@ public class SimplePingPongAI : MonoBehaviour
         aiSpeed = originalSpeed;
         targetPosition = startPosition;
         isServing = false;
+    }
+
+    private void ExecuteDeterministicAIReturn()
+    {
+        if (ballController == null || playerTableTarget == null) return;
+
+        lastAiHitTime = Time.time;
+
+        Vector3 forwardDir = playerTableTarget.position - ball.position;
+        forwardDir.y = 0f;
+        forwardDir = forwardDir.sqrMagnitude > 0.001f ? forwardDir.normalized : new Vector3(sideMultiplier, 0f, 0f);
+        Vector3 rightDir = Vector3.Cross(Vector3.up, forwardDir).normalized;
+
+        float roll = Random.value;
+        ArcadeShotType aiShot = ArcadeShotType.Drive;
+        float flightTime = Random.Range(aiReturnFlightTimeMin, aiReturnFlightTimeMax);
+        float clearance = 0.26f;
+        Vector3 curve = Vector3.zero;
+
+        if (roll < aiSmashChance)
+        {
+            aiShot = ArcadeShotType.Smash;
+            flightTime = aiReturnFlightTimeMin * 0.78f;
+            clearance = 0.12f;
+        }
+        else if (roll < aiSmashChance + aiSliceChance)
+        {
+            aiShot = ArcadeShotType.Slice;
+            flightTime = aiReturnFlightTimeMax * 1.25f;
+            clearance = 0.45f;
+            curve = rightDir * (Random.value < 0.5f ? -2.6f : 2.6f);
+        }
+
+        Vector3 targetLanding = playerTableTarget.position
+            + rightDir * Random.Range(-playerTableHalfWidth, playerTableHalfWidth)
+            + forwardDir * Random.Range(-playerTableHalfLength * 0.4f, playerTableHalfLength * 0.65f);
+
+        float netTopY = playerTableTarget.position.y + netHeightAboveTable;
+        ballController.LaunchBallistic(targetLanding, flightTime, netTopY, clearance, aiShot, curve);
+
+        if (ballReporter != null)
+        {
+            ballReporter.NotifyEnemyPaddleHit(aiShot == ArcadeShotType.Smash ? 0.95f : 0.65f);
+        }
     }
 }

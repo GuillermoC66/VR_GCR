@@ -22,9 +22,12 @@ public class TitleScreenManager : MonoBehaviour
     public InputActionReference rightTrigger;
 
     private bool isLoading = false; // Evita cargar la escena dos veces si presionas ambos gatillos
+    private XRControllerLayoutManager layoutManager;
 
     void Start()
     {
+        BindLayoutManager();
+
         // Iniciar el efecto visual
         if (promptText != null)
         {
@@ -34,19 +37,53 @@ public class TitleScreenManager : MonoBehaviour
 
     void OnEnable()
     {
-        // Suscribirse a los botones
-        if (leftTrigger != null) leftTrigger.action.performed += StartGame;
-        if (rightTrigger != null) rightTrigger.action.performed += StartGame;
+        BindLayoutManager();
+
+        // Fallback si aún no hay XRControllerLayoutManager en Scene_Title
+        if (layoutManager == null)
+        {
+            if (leftTrigger != null) leftTrigger.action.performed += StartGame;
+            if (rightTrigger != null) rightTrigger.action.performed += StartGame;
+        }
     }
 
     void OnDisable()
     {
+        UnbindLayoutManager();
+
         // Limpiar la suscripción para evitar errores
         if (leftTrigger != null) leftTrigger.action.performed -= StartGame;
         if (rightTrigger != null) rightTrigger.action.performed -= StartGame;
     }
 
+    private void BindLayoutManager()
+    {
+        if (layoutManager != null) return;
+
+        layoutManager = XRControllerLayoutManager.Instance;
+        if (layoutManager != null)
+        {
+            if (leftTrigger != null) leftTrigger.action.performed -= StartGame;
+            if (rightTrigger != null) rightTrigger.action.performed -= StartGame;
+
+            layoutManager.OnMenuConfirm += StartGameFromLayout;
+        }
+    }
+
+    private void UnbindLayoutManager()
+    {
+        if (layoutManager == null) return;
+
+        layoutManager.OnMenuConfirm -= StartGameFromLayout;
+        layoutManager = null;
+    }
+
     private void StartGame(InputAction.CallbackContext context)
+    {
+        StartGameFromLayout();
+    }
+
+    private void StartGameFromLayout()
     {
         if (!isLoading)
         {

@@ -1060,12 +1060,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 528234805b3982449a6d1f8645dec703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaddleFlickController
-  flickMultiplier: 1.52
-  baseHitSpeed: 8
-  maxHitSpeed: 15
-  aimAssistStrength: 0.2
+  paddleStats: {fileID: 0}
+  buttonA: {fileID: 0}
+  buttonB: {fileID: 0}
   targetPoint: {fileID: 0}
-  ballTag: Ball
+  idealStrikePlane: {fileID: 0}
+  netHeightAboveTable: 0.155
+  enemyTableHalfWidth: 0.68
+  enemyTableHalfLength: 0.58
+  forceTriggerCollider: 1
+  minTriggerSwingSpeed: 0.45
+  enableSwingProximityAssist: 1
+  swingAssistRadius: 0.2
+  assistMinSwingSpeed: 1.35
+  maxSwingSpeed: 5.5
+  hitCooldown: 0.25
+  perfectWindow: 0.22
+  goodWindow: 0.58
+  bouncePhaseWeight: 0.7
+  smashWindowStrictness: 0.65
+  driveFlightTimeMin: 0.44
+  driveFlightTimeMax: 0.62
+  driveNetClearance: 0.26
+  smashFlightTimeMin: 0.26
+  smashFlightTimeMax: 0.36
+  smashNetClearance: 0.09
+  sliceFlightTimeMin: 0.68
+  sliceFlightTimeMax: 0.88
+  sliceNetClearance: 0.5
+  sliceBaseCurveAccel: 3.2
+  fastballFlightTime: 0.23
+  hurricaneCurveAccel: 7.5
+  perfectSmashHitstop: 0.038
+  specialHitstop: 0.048
 --- !u!54 &1023493617
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1620,6 +1647,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 489628086}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8806329115733545877, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1303824127}
     - targetCorrespondingSourceObject: {fileID: 7917674758919744183, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1303824112}
@@ -1656,7 +1686,197 @@ MonoBehaviour:
   leftSummonAction: {fileID: 0}
   rightHandTransform: {fileID: 0}
   rightSummonAction: {fileID: 0}
+  autoServeUpwardSpeed: 3.2
+  autoServeForwardSpeed: 0.25
   isLefty: 0
+--- !u!114 &1303824113 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8053059486601427065, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b1e8c997df241c1a67045eeac79b41b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824114 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8476853769231596631, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01f69dc1cb084aa42b2f2f8cd87bc770, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824115 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3752030747713321391, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75b29b6c6428c984a8a73ffc2d58063b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824116 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 583340563854170035, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9f365cf844c03449bc8973eead2c3c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824117 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9059786329452581396, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303824126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0cb9aa70a22847b5925ee5f067c10a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824118 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1517992048397969941, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0924bcaa9eb50df458a783ae0e2b59f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824119 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5488570530423974502, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a07ef133a37d140a87cdf1f1c75fdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824120 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3634828268933930783, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0924bcaa9eb50df458a783ae0e2b59f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824121 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3359539261843778952, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a07ef133a37d140a87cdf1f1c75fdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824122 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8629926924687228403, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a07ef133a37d140a87cdf1f1c75fdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824123 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8095668283459231490, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0924bcaa9eb50df458a783ae0e2b59f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824124 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1644703820982035308, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a07ef133a37d140a87cdf1f1c75fdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1303824125 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5883657154760981275, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0924bcaa9eb50df458a783ae0e2b59f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1303824126 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8806329115733545877, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+  m_PrefabInstance: {fileID: 1303824108}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1303824127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303824126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f876d92dc66838a438c37a689ada0342, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XRControllerLayoutManager
+  defaultLayout: 0
+  syncLeftyWithPlayerPrefs: 1
+  pingPongInputActions: {fileID: -944628639613478452, guid: 413dfec5b4c691947bf3a9c517d399f6, type: 3}
+  xriDefaultInputActions: {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  xrOrigin: {fileID: 1303824117}
+  nearFarInteractors:
+  - {fileID: 1303824124}
+  - {fileID: 1303824122}
+  - {fileID: 1303824121}
+  - {fileID: 1303824119}
+  pokeInteractors:
+  - {fileID: 1303824125}
+  - {fileID: 1303824123}
+  - {fileID: 1303824120}
+  - {fileID: 1303824118}
+  teleportInteractors: []
+  continuousMoveProvider: {fileID: 1303824113}
+  snapTurnProvider: {fileID: 1303824116}
+  continuousTurnProvider: {fileID: 1303824115}
+  teleportationProvider: {fileID: 1303824114}
+  rightHandPaddle: {fileID: 0}
+  leftHandPaddle: {fileID: 0}
+  rightControllerModel: {fileID: 0}
+  leftControllerModel: {fileID: 0}
+  matchLateralSpeed: 1.6
+  maxLateralOffset: 1.2
+  lateralDeadzone: 0.15
+  lateralReferenceTransform: {fileID: 0}
 --- !u!1 &1533553855
 GameObject:
   m_ObjectHideFlags: 0
@@ -2233,12 +2453,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 528234805b3982449a6d1f8645dec703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaddleFlickController
-  flickMultiplier: 1.52
-  baseHitSpeed: 8
-  maxHitSpeed: 15
-  aimAssistStrength: 0.2
+  paddleStats: {fileID: 0}
+  buttonA: {fileID: 0}
+  buttonB: {fileID: 0}
   targetPoint: {fileID: 0}
-  ballTag: Ball
+  idealStrikePlane: {fileID: 0}
+  netHeightAboveTable: 0.155
+  enemyTableHalfWidth: 0.68
+  enemyTableHalfLength: 0.58
+  forceTriggerCollider: 1
+  minTriggerSwingSpeed: 0.45
+  enableSwingProximityAssist: 1
+  swingAssistRadius: 0.2
+  assistMinSwingSpeed: 1.35
+  maxSwingSpeed: 5.5
+  hitCooldown: 0.25
+  perfectWindow: 0.22
+  goodWindow: 0.58
+  bouncePhaseWeight: 0.7
+  smashWindowStrictness: 0.65
+  driveFlightTimeMin: 0.44
+  driveFlightTimeMax: 0.62
+  driveNetClearance: 0.26
+  smashFlightTimeMin: 0.26
+  smashFlightTimeMax: 0.36
+  smashNetClearance: 0.09
+  sliceFlightTimeMin: 0.68
+  sliceFlightTimeMax: 0.88
+  sliceNetClearance: 0.5
+  sliceBaseCurveAccel: 3.2
+  fastballFlightTime: 0.23
+  hurricaneCurveAccel: 7.5
+  perfectSmashHitstop: 0.038
+  specialHitstop: 0.048
 --- !u!54 &2107663444
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/03 Scenes/Scene_Title.unity
     guid: 13466c819a545ca408a7445de5889104
   - enabled: 0
-    path: Assets/03 Scenes/SampleScene.unity
+    path: Assets/03 Scenes/Practice_Match.unity
     guid: 55daccc09a3b69647bbab145b54a3ab3
   - enabled: 1
     path: Assets/03 Scenes/Practice_Bot_Scene.unity

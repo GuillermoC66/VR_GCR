@@ -70,13 +70,20 @@ public class TableSetup : MonoBehaviour
         }
 
         // TABLE SURFACE — main flat playing area
-        // This is the collider the ball will bounce on
-        AddBoxCollider(
+        // This is the collider the ball will bounce on (disabled if TablePlayer & TableEnemy split colliders exist)
+        GameObject surfaceObj = AddBoxCollider(
             gameObject,
             name: "Collider_Surface",
             center: new Vector3(-0.333f, 0.74f, 2.168f),       // top of table
             size: new Vector3(tableDimensions.x, 0.04f, tableDimensions.z)  // thin slab
         );
+
+        bool hasSplitTableSides = transform.Find("TablePlayer") != null && transform.Find("TableEnemy") != null;
+        if (hasSplitTableSides && surfaceObj != null)
+        {
+            BoxCollider surfBc = surfaceObj.GetComponent<BoxCollider>();
+            if (surfBc != null) surfBc.enabled = false;
+        }
 
         // TABLE BODY — the legs and frame as a single blocker
         // Players shouldn't walk through the table base
@@ -88,17 +95,18 @@ public class TableSetup : MonoBehaviour
         );
 
         // NET — thin vertical blocker at the centre
-        AddBoxCollider(
+        GameObject netObj = AddBoxCollider(
             gameObject,
             name: "Collider_Net",
             center: new Vector3(-0.333f, tableDimensions.y + 0.08f, 2.168f),  // sits above surface
             size: new Vector3(0.02f, 0.16f, tableDimensions.z + 0.1f) // thin wall
         );
+        TryAssignTagSafe(netObj, "Net");
 
         Debug.Log("[TableSetup] Colliders set up successfully.");
     }
 
-    void AddBoxCollider(GameObject parent, string name, Vector3 center, Vector3 size)
+    GameObject AddBoxCollider(GameObject parent, string name, Vector3 center, Vector3 size)
     {
         // Re-use existing child with this name, or create new one
         Transform existing = parent.transform.Find(name);
@@ -115,6 +123,20 @@ public class TableSetup : MonoBehaviour
 
         bc.center = center;
         bc.size = size;
+        return colliderObj;
+    }
+
+    private static void TryAssignTagSafe(GameObject go, string tagName)
+    {
+        if (go == null || string.IsNullOrEmpty(tagName)) return;
+        try
+        {
+            go.tag = tagName;
+        }
+        catch (UnityException)
+        {
+            // Tag no registrado aún en TagManager
+        }
     }
 
     // ─────────────────────────────────────────────

@@ -30,6 +30,107 @@ Experience a new level of precision with motion-controlled gameplay designed for
 
 ---
 
+## 🎮 VR Controller Layouts (XRI 3.3)
+
+**PingPing PongPong** uses three dedicated physical VR controller layouts (**Meta Quest Touch / OpenXR**), managed at runtime by `XRControllerLayoutManager` (`FINALVR_GCR/Assets/01 Scripts/XRControllerLayoutManager.cs`) and `PingPongInputActions.inputactions` (`FINALVR_GCR/Assets/05 Input/PingPongInputActions.inputactions`).
+
+> [!NOTE]
+> The right controller's **Meta / Oculus (`∞`)** button is reserved by Meta Horizon OS and cannot be bound by Unity apps. All in-game pause/menu toggling uses the left controller's **Menu (`≡`)** button.
+
+### Layout State Flow
+
+```mermaid
+stateDiagram-v2
+    [*] --> Menu: "Scene_Title (defaultLayout = Menu)"
+    Menu --> Lobby: "Confirm / Enter HUB"
+    Lobby --> Match: "Enter Match / Practice"
+    Match --> Menu: "Menu Button (≡) [Pause] / Match End"
+    Lobby --> Menu: "Menu Button (≡) [Settings]"
+    Menu --> Match: "Resume (ExitPauseMenu)"
+    Menu --> Lobby: "Close Settings (ExitPauseMenu)"
+```
+
+### 1. Menus (`ControllerLayoutMode.Menu`)
+
+**Used in:** `Scene_Title`, Match Pause, Lobby Settings, Match End, and modal panels.  
+**Behavior:** Fully ambidextrous · UI Laser Ray + Poke on both hands · Locomotion OFF · Physical Near Grab OFF · Paddles hidden and both controller models visible.
+
+| Input | Left Hand | Right Hand | Action Map / Action |
+| :--- | :--- | :--- | :--- |
+| **Trigger** | Select / UI Click / Drag sliders | Select / UI Click / Drag sliders | `XRI Interaction` (`UI Press`) + `Layout_Menu/Confirm` |
+| **Grip** | Disabled (no physical grab) | Disabled (no physical grab) | — |
+| **Thumbstick** | UI list scrolling | UI list scrolling | `XRI Interaction` (`UI Scroll`) + `Layout_Menu/Scroll` |
+| **Primary (X / A)** | Alternate confirm | Alternate confirm | `Layout_Menu/Confirm` |
+| **Secondary (Y / B)** | Back / Close submenu | Back / Close submenu | `Layout_Menu/Back` |
+| **Menu (`≡`)** | Close pause & restore previous layout | *(Reserved by Meta OS)* | `Layout_Menu/TogglePause` |
+
+### 2. Lobby / HUB (`ControllerLayoutMode.Lobby`)
+
+**Used in:** `Lobby.unity` (exploring the HUB, selecting modes, paddle shop, NPCs, and floating boards).  
+**Behavior:** Standard XRI 3.3 locomotion · Near-Far Interactor (physical grab + UI ray) + Poke on both hands · Paddles hidden and hands free.
+
+| Input | Left Hand | Right Hand | Action Map / Action |
+| :--- | :--- | :--- | :--- |
+| **Thumbstick (360°)** | Continuous movement | *(Left/Right)* Snap Turn · *(Up)* Teleport | `XRI Left/Right Locomotion` |
+| **Trigger** | Laser ray / Click boards, NPCs & portals | Laser ray / Click boards, NPCs & portals | `XRI Left/Right Interaction` (`Activate` / `UI Press`) |
+| **Grip** | Grab physical objects (shop paddles, etc.) | Grab physical objects (shop paddles, etc.) | `XRI Left/Right Interaction` (`Select`) |
+| **Secondary (Y / B)** | Back / Cancel interaction | Back / Cancel interaction | `Layout_Lobby/Back` |
+| **Menu (`≡`)** | Open Pause / Settings (`EnterPauseMenu`) | *(Reserved by Meta OS)* | `Layout_Lobby/TogglePause` |
+
+### 3. Matches (`ControllerLayoutMode.Match`)
+
+**Used in:** `Practice_Bot_Scene` and all match / tournament / story arenas.  
+**Behavior:** Dynamically mirrored based on `isLefty` (persisted across scenes via `PlayerPrefs`) · Dominant hand holds the paddle · Off-hand handles ball serving & smooth clamped lateral movement · Teleport, Turning, and UI Rays **OFF**.
+
+#### Right-Handed Mode (`Layout_Match_RightHanded` — `isLefty = false`)
+
+| Input | Left Hand (Off-Hand — Ball) | Right Hand (Dominant — Paddle) | Action (`PingPongInputActions`) |
+| :--- | :--- | :--- | :--- |
+| **Trigger** | *(Free)* | **Smash** *(hold while swinging)* | `Smash` |
+| **Grip** | **Summon / Hold ball** *(release to toss)* | **Slice** *(hold while swinging)* | `SummonBall` / `Slice` |
+| **Trigger + Grip** | — | **Special Shot** *(at 100% energy)* | `IsSuperComboPressed` |
+| **Secondary (Y / B)** | **Assisted Auto-Serve** *(tosses ball up)* | *(Free)* | `AutoServe` |
+| **Thumbstick (X axis)** | **Smooth lateral movement** *(clamped to table)* | *(Free)* | `LateralMove` |
+| **Menu (`≡`)** | **Pause** *(switches to Menu layout)* | *(Reserved by Meta OS)* | `TogglePause` |
+
+#### Left-Handed Mode (`Layout_Match_LeftHanded` — `isLefty = true`)
+
+| Input | Left Hand (Dominant — Paddle) | Right Hand (Off-Hand — Ball) | Action (`PingPongInputActions`) |
+| :--- | :--- | :--- | :--- |
+| **Trigger** | **Smash** | *(Free)* | `Smash` |
+| **Grip** | **Slice** | **Summon / Hold ball** *(release to toss)* | `Slice` / `SummonBall` |
+| **Trigger + Grip** | **Special Shot** *(at 100% energy)* | — | `IsSuperComboPressed` |
+| **Secondary (Y / B)** | *(Free)* | **Assisted Auto-Serve** *(tosses ball up)* | `AutoServe` |
+| **Thumbstick (X axis)** | *(Free)* | **Smooth lateral movement** *(clamped to table)* | `LateralMove` |
+| **Menu (`≡`)** | **Pause** *(switches to Menu layout)* | *(Reserved by Meta OS)* | `TogglePause` |
+
+### Technical Matrix (Action Maps & XRI Interactors)
+
+| XRI Resource / Input | `Menu` | `Lobby` | `Match` |
+| :--- | :---: | :---: | :---: |
+| `XRI Head`, `XRI Left`, `XRI Right` (Tracking / Haptics) | ON | ON | ON |
+| `XRI Left/Right Interaction` + `XRI UI` | ON | ON | OFF |
+| `XRI Left/Right Locomotion` | OFF | ON | OFF |
+| `Layout_Menu` | ON | OFF | OFF |
+| `Layout_Lobby` | OFF | ON | OFF |
+| `Layout_Match_RightHanded` / `LeftHanded` | OFF | OFF | ON (by `isLefty`) |
+| `NearFarInteractor` (Far / UI Ray) | ON | ON | OFF |
+| `NearFarInteractor` (Near Grab) | OFF | ON | OFF |
+| `XRPokeInteractor` | ON | ON | OFF |
+| `TeleportInteractor` + Move / Turn / Teleport Providers | OFF | ON | OFF |
+| Smooth table lateral movement | OFF | OFF | ON |
+| Dominant-hand paddle visible | OFF | OFF | ON |
+
+### Scene Setup in Unity
+
+Run **`Tools → PingPing PongPong → Configurar XR Layout Manager en Escena Actual`** (`FINALVR_GCR/Assets/01 Scripts/Editor/XRLayoutSetupEditor.cs`) in each scene and save (`Ctrl+S`):
+
+1. **`Scene_Title.unity`** — auto-configures `defaultLayout = Menu`.
+2. **`Lobby.unity`** — auto-configures `defaultLayout = Lobby`.
+3. **`Practice_Bot_Scene.unity`** (and match arenas) — auto-configures `defaultLayout = Match` and wires paddle/controller references from `MenuManager`. Lateral movement bounds can be tuned via `Match Lateral Speed` (`1.6 m/s`) and `Max Lateral Offset` (`1.2 m`).
+
+---
+
 ## ✨ Key Features
 
 *   **Dynamic Cel-Shaded Visuals:** A vibrant, anime-inspired art style that emphasizes motion and impact through speed lines and dramatic visual effects.

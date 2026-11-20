@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98e685c159204584bbe7c5a074124b14, type: 3}
+  m_Name: Rival_EntrenadorKai
+  m_EditorClassIdentifier: Assembly-CSharp::RivalProfile
+  rivalName: Entrenador Kai
+  rivalTitle: Rival Equilibrado
+  description: "Un maestro vers\xE1til que adapta su ritmo, colocaci\xF3n y poder
+    especial para poner a prueba tus reflejos."
+  specialPower: 0
+  primaryColor: {r: 0.18, g: 0.45, b: 0.85, a: 1}
+  secondaryColor: {r: 0.95, g: 0.85, b: 0.25, a: 1}
+  speedMultiplier: 1
+  powerCurveMultiplier: 1
+  aggressionMultiplier: 1
+  easyProfile: {fileID: 11400000, guid: 8d18bac6991243b4996efa838c0d6fbd, type: 2}
+  mediumProfile: {fileID: 11400000, guid: c438d7f7836b9bc4796c9adbc79abe59, type: 2}
+  hardProfile: {fileID: 11400000, guid: c3c4e2ae9507d0149bd3455a0216da9d, type: 2}

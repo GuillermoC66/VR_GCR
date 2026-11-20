@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55b8704c567363447bb794c9bec6b403, type: 3}
+  m_Name: Difficulty_Medium
+  m_EditorClassIdentifier: Assembly-CSharp::RivalDifficultyProfile
+  difficulty: 1
+  displayLabel: Medio
+  description: Rival equilibrado que predice el rebote, mezcla Drives, Slices y Remates,
+    y aprovecha su poder especial con criterio.
+  accentColor: {r: 1, g: 0.7, b: 0.16, a: 1}
+  paddleMoveSpeed: 6.2
+  returnToCenterSpeed: 3.8
+  reactionDelay: 0.11
+  useBallisticPrediction: 1
+  predictBeforeNetCross: 0
+  positionErrorMargin: 0.08
+  reachRadius: 0.44
+  returnFlightTimeMin: 0.46
+  returnFlightTimeMax: 0.62
+  driveChance: 0.54
+  sliceChance: 0.26
+  smashChance: 0.2
+  sliceCurveStrength: 2.8
+  smashFlightTimeMultiplier: 0.78
+  netClearanceDrive: 0.25
+  netClearanceSmash: 0.12
+  netClearanceSlice: 0.44
+  placementSpreadWidth01: 0.7
+  placementDepthMin01: -0.35
+  placementDepthMax01: 0.55
+  antiPlayerPlacementWeight: 0.35
+  baseMissChance: 0.07
+  extraMissVsSmash: 0.16
+  extraMissVsSpecial: 0.24
+  extraMissVsExtremeAngle: 0.12
+  serveFaultChance: 0.04
+  servePauseDuration: 0.9
+  serveFlightTimeMin: 0.5
+  serveFlightTimeMax: 0.62
+  serveSliceChance: 0.22
+  serveFastChance: 0.18
+  serveWidthSpread01: 0.65
+  powerHitsRequired: 6
+  powerChargePerReturn: 1
+  powerUseProbabilityWhenReady: 0.6
+  specialFlightTimeMultiplier: 0.92
+  specialTelegraphLeadTime: 0.42

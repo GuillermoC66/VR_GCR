@@ -75,6 +75,11 @@ public class BallLauncherRobot : MonoBehaviour
     [Header("Tiros Disponibles (Game Feel Test)")]
     public List<RobotShot> availableShots = new List<RobotShot>();
 
+    [Header("Física Balística Determinista")]
+    [Tooltip("Usa BallController.LaunchBallistic para garantizar que cada tiro del robot aterrice en su Target Point.")]
+    public bool useBallisticSolver = true;
+    public float netHeightAboveTable = 0.155f;
+
     private Coroutine launchCoroutine;
 
     void Awake()
@@ -207,13 +212,33 @@ public class BallLauncherRobot : MonoBehaviour
             yield return new WaitForSeconds(animationDelay);
         }
 
-        // 7. Aplicar fuerza física a la pelota (disparo real)
-        Rigidbody ballRb = ball.GetComponent<Rigidbody>();
-        if (ballRb != null)
+        // 7. Aplicar disparo (Balístico Determinista o Físico Clásico)
+        if (useBallisticSolver && ball != null)
         {
-            ballRb.useGravity = true;
-            ballRb.linearVelocity = launchDirection * selectedShot.speed;
-            ballRb.angularVelocity = Vector3.zero; 
+            float dist = Vector3.Distance(launchPos.position, selectedShot.targetPoint.position);
+            float flightTime = Mathf.Clamp(dist / Mathf.Max(2.5f, selectedShot.speed), 0.35f, 1.0f);
+            float netTopY = selectedShot.targetPoint.position.y + netHeightAboveTable;
+            float clearance = Mathf.Lerp(0.12f, 0.55f, Mathf.Clamp01(selectedShot.upwardArc / 45f));
+
+            ball.LaunchBallistic(
+                selectedShot.targetPoint.position,
+                flightTime,
+                netTopY,
+                clearance,
+                ArcadeShotType.Drive,
+                Vector3.zero
+            );
+        }
+        else
+        {
+            Rigidbody ballRb = ball.GetComponent<Rigidbody>();
+            if (ballRb != null)
+            {
+                ballRb.isKinematic = false;
+                ballRb.useGravity = false;
+                ballRb.linearVelocity = launchDirection * selectedShot.speed;
+                ballRb.angularVelocity = Vector3.zero;
+            }
         }
     }
 

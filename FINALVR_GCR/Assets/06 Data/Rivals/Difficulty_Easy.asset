@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55b8704c567363447bb794c9bec6b403, type: 3}
+  m_Name: Difficulty_Easy
+  m_EditorClassIdentifier: Assembly-CSharp::RivalDifficultyProfile
+  difficulty: 0
+  displayLabel: "F\xE1cil"
+  description: Ritmo relajado y devoluciones al centro. Reacciona tarde ante remates
+    y usa su poder especial con poca frecuencia.
+  accentColor: {r: 0.22, g: 0.85, b: 0.48, a: 1}
+  paddleMoveSpeed: 3.6
+  returnToCenterSpeed: 2.4
+  reactionDelay: 0.24
+  useBallisticPrediction: 0
+  predictBeforeNetCross: 0
+  positionErrorMargin: 0.16
+  reachRadius: 0.36
+  returnFlightTimeMin: 0.6
+  returnFlightTimeMax: 0.78
+  driveChance: 0.85
+  sliceChance: 0.12
+  smashChance: 0.03
+  sliceCurveStrength: 1.4
+  smashFlightTimeMultiplier: 0.88
+  netClearanceDrive: 0.3
+  netClearanceSmash: 0.18
+  netClearanceSlice: 0.48
+  placementSpreadWidth01: 0.35
+  placementDepthMin01: -0.25
+  placementDepthMax01: 0.25
+  antiPlayerPlacementWeight: 0
+  baseMissChance: 0.16
+  extraMissVsSmash: 0.28
+  extraMissVsSpecial: 0.38
+  extraMissVsExtremeAngle: 0.22
+  serveFaultChance: 0.08
+  servePauseDuration: 1.15
+  serveFlightTimeMin: 0.62
+  serveFlightTimeMax: 0.74
+  serveSliceChance: 0.05
+  serveFastChance: 0
+  serveWidthSpread01: 0.35
+  powerHitsRequired: 10
+  powerChargePerReturn: 1
+  powerUseProbabilityWhenReady: 0.25
+  specialFlightTimeMultiplier: 1.08
+  specialTelegraphLeadTime: 0.55

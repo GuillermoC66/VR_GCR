@@ -15,38 +15,53 @@ public class BallSummoner : MonoBehaviour
     public Transform rightHandTransform; 
     public InputActionReference rightSummonAction; 
 
+    [Header("Auto-Saque Asistido (Botón Secundario Y/B)")]
+    [Tooltip("Velocidad vertical al presionar el botón de saque asistido en la mano no dominante.")]
+    public float autoServeUpwardSpeed = 3.2f;
+    [Tooltip("Ligero impulso hacia adelante al hacer saque asistido.")]
+    public float autoServeForwardSpeed = 0.25f;
+
     [HideInInspector]
-    public bool isLefty = false; // Esta variable la controlará nuestro MenuManager
+    public bool isLefty = false; // Sincronizado con XRControllerLayoutManager / MenuManager
 
     // Variables de estado interno
     private bool isHoldingBall = false;
     private Vector3 lastHandPosition;
     private Vector3 handVelocity;
+    private XRControllerLayoutManager layoutManager;
+    private MatchReferee referee;
 
     private void Start()
     {
         if (ball != null) ballRb = ball.GetComponent<Rigidbody>();
+        referee = FindFirstObjectByType<MatchReferee>();
+        BindLayoutManager();
     }
 
     private void OnEnable()
     {
-        // Suscribir eventos de la mano izquierda
-        if (leftSummonAction != null)
+        BindLayoutManager();
+
+        // Fallback legado solo si no hay XRControllerLayoutManager en la escena
+        if (layoutManager == null)
         {
-            leftSummonAction.action.started += OnLeftPressed;
-            leftSummonAction.action.canceled += OnLeftReleased;
-        }
-        
-        // Suscribir eventos de la mano derecha
-        if (rightSummonAction != null)
-        {
-            rightSummonAction.action.started += OnRightPressed;
-            rightSummonAction.action.canceled += OnRightReleased;
+            if (leftSummonAction != null)
+            {
+                leftSummonAction.action.started += OnLeftPressed;
+                leftSummonAction.action.canceled += OnLeftReleased;
+            }
+            if (rightSummonAction != null)
+            {
+                rightSummonAction.action.started += OnRightPressed;
+                rightSummonAction.action.canceled += OnRightReleased;
+            }
         }
     }
 
     private void OnDisable()
     {
+        UnbindLayoutManager();
+
         if (leftSummonAction != null)
         {
             leftSummonAction.action.started -= OnLeftPressed;
@@ -56,6 +71,84 @@ public class BallSummoner : MonoBehaviour
         {
             rightSummonAction.action.started -= OnRightPressed;
             rightSummonAction.action.canceled -= OnRightReleased;
+        }
+    }
+
+    private void BindLayoutManager()
+    {
+        if (layoutManager != null) return;
+
+        layoutManager = XRControllerLayoutManager.Instance;
+        if (layoutManager == null) return;
+
+        // Evitar doble disparo si el fallback legado quedó suscrito
+        if (leftSummonAction != null)
+        {
+            leftSummonAction.action.started -= OnLeftPressed;
+            leftSummonAction.action.canceled -= OnLeftReleased;
+        }
+        if (rightSummonAction != null)
+        {
+            rightSummonAction.action.started -= OnRightPressed;
+            rightSummonAction.action.canceled -= OnRightReleased;
+        }
+
+        isLefty = layoutManager.IsLefty;
+        layoutManager.OnLeftyChanged += HandleLeftyChanged;
+        layoutManager.OnSummonBallStarted += StartHolding;
+        layoutManager.OnSummonBallCanceled += StopHolding;
+        layoutManager.OnAutoServePressed += TriggerAutoServe;
+    }
+
+    private void UnbindLayoutManager()
+    {
+        if (layoutManager == null) return;
+
+        layoutManager.OnLeftyChanged -= HandleLeftyChanged;
+        layoutManager.OnSummonBallStarted -= StartHolding;
+        layoutManager.OnSummonBallCanceled -= StopHolding;
+        layoutManager.OnAutoServePressed -= TriggerAutoServe;
+        layoutManager = null;
+    }
+
+    private void HandleLeftyChanged(bool lefty)
+    {
+        isLefty = lefty;
+    }
+
+    /// <summary>
+    /// Coloca la pelota en la mano no dominante y la lanza suavemente hacia arriba para saque asistido.
+    /// </summary>
+    public void TriggerAutoServe()
+    {
+        if (ball == null || ballRb == null) return;
+        if (referee == null) referee = FindFirstObjectByType<MatchReferee>();
+        if (referee != null && !referee.CanPlayerSummonOrServeBall()) return;
+
+        Transform activeHand = isLefty ? rightHandTransform : leftHandTransform;
+        if (activeHand == null) return;
+
+        isHoldingBall = false;
+        ball.transform.position = activeHand.position + Vector3.up * 0.08f;
+        ballRb.isKinematic = false;
+        ballRb.useGravity = true;
+
+        Vector3 forward = activeHand.forward;
+        forward.y = 0f;
+        if (forward.sqrMagnitude > 0.001f) forward.Normalize();
+
+        Vector3 serveVel = Vector3.up * autoServeUpwardSpeed + forward * autoServeForwardSpeed;
+        BallController bc = ball.GetComponent<BallController>();
+        if (bc != null)
+        {
+            bc.ReleaseForServe(serveVel);
+        }
+        else
+        {
+            ballRb.isKinematic = false;
+            ballRb.useGravity = true;
+            ballRb.linearVelocity = serveVel;
+            ballRb.angularVelocity = Vector3.zero;
         }
     }
 
@@ -88,6 +181,9 @@ public class BallSummoner : MonoBehaviour
     // --- Físicas de Agarre y Lanzamiento ---
     private void StartHolding()
     {
+        if (referee == null) referee = FindFirstObjectByType<MatchReferee>();
+        if (referee != null && !referee.CanPlayerSummonOrServeBall()) return;
+
         if (ball != null && ballRb != null)
         {
             isHoldingBall = true;
@@ -100,9 +196,17 @@ public class BallSummoner : MonoBehaviour
         if (ball != null && ballRb != null && isHoldingBall)
         {
             isHoldingBall = false;
-            ballRb.isKinematic = false;
-            ballRb.linearVelocity = handVelocity;
-            ballRb.angularVelocity = Vector3.zero;
+            BallController bc = ball.GetComponent<BallController>();
+            if (bc != null)
+            {
+                bc.ReleaseForServe(handVelocity);
+            }
+            else
+            {
+                ballRb.isKinematic = false;
+                ballRb.linearVelocity = handVelocity;
+                ballRb.angularVelocity = Vector3.zero;
+            }
         }
     }
 

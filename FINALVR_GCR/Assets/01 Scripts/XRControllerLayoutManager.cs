@@ -19,7 +19,7 @@ public enum ControllerLayoutMode
 /// Controla Action Maps, Interactors de XRI 3.3, Locomoción, modelos de pala/control,
 /// modo zurdo persistente (PlayerPrefs) y movimiento lateral suave durante los partidos.
 /// </summary>
-[DefaultExecutionOrder(-100)]
+[DefaultExecutionOrder(-300)]
 public class XRControllerLayoutManager : MonoBehaviour
 {
     private const string LeftyPrefKey = "PingPong_IsLefty";
@@ -69,6 +69,24 @@ public class XRControllerLayoutManager : MonoBehaviour
     public GameObject leftHandPaddle;
     public GameObject rightControllerModel;
     public GameObject leftControllerModel;
+
+    [Header("Manos VR (OpenXRCustomHandPrefab)")]
+    [Tooltip("Controlador de mano virtual derecha (reemplaza al modelo 3D del mando derecho).")]
+    public VRHandController rightHandVisual;
+
+    [Tooltip("Controlador de mano virtual izquierda (reemplaza al modelo 3D del mando izquierdo).")]
+    public VRHandController leftHandVisual;
+
+    [Tooltip("Opcional: Prefab Variant de mano derecha para auto-instanciación de respaldo en runtime.")]
+    public GameObject rightHandPrefab;
+
+    [Tooltip("Opcional: Prefab Variant de mano izquierda para auto-instanciación de respaldo en runtime.")]
+    public GameObject leftHandPrefab;
+
+    /// <summary>
+    /// Indica si esta escena corresponde a un partido con palas asignadas (Practice_Match o Practice_Bot_Scene).
+    /// </summary>
+    public bool IsMatchScene => defaultLayout == ControllerLayoutMode.Match && (rightHandPaddle != null || leftHandPaddle != null);
 
     [Header("Movimiento Lateral en Partido (Stick Mano No Dominante)")]
     [Tooltip("Velocidad del desplazamiento lateral suave en m/s durante un partido.")]
@@ -141,10 +159,18 @@ public class XRControllerLayoutManager : MonoBehaviour
             if (xrOrigin == null) xrOrigin = FindFirstObjectByType<XROrigin>();
         }
 
+        if (nearFarInteractors == null || nearFarInteractors.Length == 0)
+        {
+            AutoDetectReferences();
+        }
+
         if (syncLeftyWithPlayerPrefs)
         {
             IsLefty = PlayerPrefs.GetInt(LeftyPrefKey, 0) == 1;
         }
+
+        // Garantizar desde Awake que XRInputModalityManager no apague Left/Right Controller y que ambas manos inicien prendidas
+        EnsureControllersAndHandsActive();
 
         PreviousLayout = defaultLayout;
         CacheStaticActions();
@@ -152,6 +178,7 @@ public class XRControllerLayoutManager : MonoBehaviour
 
     private void OnEnable()
     {
+        EnsureControllersAndHandsActive();
         SubscribeStaticActions();
     }
 
@@ -234,8 +261,10 @@ public class XRControllerLayoutManager : MonoBehaviour
         if (CurrentLayout == ControllerLayoutMode.Match)
         {
             ConfigurePingPongMaps(ControllerLayoutMode.Match);
-            ApplyHandVisuals(ControllerLayoutMode.Match);
         }
+
+        // Actualiza pala y mano dominante inmediatamente tanto en partido como en el menú de ajustes del partido
+        ApplyHandVisuals(CurrentLayout);
 
         OnLeftyChanged?.Invoke(IsLefty);
     }
@@ -407,9 +436,56 @@ public class XRControllerLayoutManager : MonoBehaviour
 
     private void ApplyHandVisuals(ControllerLayoutMode mode)
     {
+        EnsureControllersAndHandsActive();
+        bool hasVRHands = rightHandVisual != null || leftHandVisual != null;
+        if (hasVRHands)
+        {
+
+            if (rightHandVisual != null && !rightHandVisual.gameObject.activeSelf)
+                rightHandVisual.gameObject.SetActive(true);
+            if (leftHandVisual != null && !leftHandVisual.gameObject.activeSelf)
+                leftHandVisual.gameObject.SetActive(true);
+
+            if (IsMatchScene)
+            {
+                // En escenas de partido, la pala y el agarre shakehand de la mano dominante se muestran SIEMPRE (desde el menú inicial, pausa y partido)
+                if (rightHandPaddle != null) rightHandPaddle.SetActive(!IsLefty);
+                if (leftHandPaddle != null) leftHandPaddle.SetActive(IsLefty);
+
+                VRHandController dominantHand = IsLefty ? leftHandVisual : rightHandVisual;
+                VRHandController offHand = IsLefty ? rightHandVisual : leftHandVisual;
+                Transform activePaddleTransform = IsLefty
+                    ? (leftHandPaddle != null ? leftHandPaddle.transform : null)
+                    : (rightHandPaddle != null ? rightHandPaddle.transform : null);
+
+                if (dominantHand != null)
+                {
+                    dominantHand.SetMode(HandVisualMode.PaddleShakehandGrip, activePaddleTransform);
+                }
+
+                if (offHand != null)
+                {
+                    HandVisualMode offHandMode = mode == ControllerLayoutMode.Match
+                        ? HandVisualMode.MatchOffHandBallGrab
+                        : HandVisualMode.NormalControllerInput;
+                    offHand.SetMode(offHandMode, null);
+                }
+            }
+            else
+            {
+                // En Lobby y Scene_Title: palas ocultas y ambas manos reaccionan normalmente a los inputs
+                if (rightHandPaddle != null) rightHandPaddle.SetActive(false);
+                if (leftHandPaddle != null) leftHandPaddle.SetActive(false);
+
+                if (rightHandVisual != null) rightHandVisual.SetMode(HandVisualMode.NormalControllerInput, null);
+                if (leftHandVisual != null) leftHandVisual.SetMode(HandVisualMode.NormalControllerInput, null);
+            }
+            return;
+        }
+
+        // Fallback legado solo si no hay manos VR en la escena
         if (mode == ControllerLayoutMode.Match)
         {
-            // Mano dominante lleva la pala; mano no dominante muestra el control libre para el saque
             if (rightHandPaddle != null) rightHandPaddle.SetActive(!IsLefty);
             if (leftHandPaddle != null) leftHandPaddle.SetActive(IsLefty);
             if (rightControllerModel != null) rightControllerModel.SetActive(IsLefty);
@@ -417,12 +493,111 @@ public class XRControllerLayoutManager : MonoBehaviour
         }
         else
         {
-            // En Menu y Lobby: palas ocultas y ambos modelos de control visibles
             if (rightHandPaddle != null) rightHandPaddle.SetActive(false);
             if (leftHandPaddle != null) leftHandPaddle.SetActive(false);
             if (rightControllerModel != null) rightControllerModel.SetActive(true);
             if (leftControllerModel != null) leftControllerModel.SetActive(true);
         }
+    }
+
+    /// <summary>
+    /// Desactiva XRInputModalityManager (que apaga Left/Right Controller cuando no detecta tracking inmediato)
+    /// y fuerza que tanto Left Controller como Right Controller y sus manos VR estén encendidos desde el inicio.
+    /// </summary>
+    public void EnsureControllersAndHandsActive()
+    {
+        Transform searchRoot = xrOrigin != null ? xrOrigin.transform : transform;
+
+        MonoBehaviour[] allBehaviours = searchRoot.GetComponentsInChildren<MonoBehaviour>(true);
+        foreach (MonoBehaviour mb in allBehaviours)
+        {
+            if (mb != null && mb.GetType().Name == "XRInputModalityManager" && mb.enabled)
+            {
+                mb.enabled = false;
+            }
+        }
+
+        Transform leftControllerTr = FindControllerTransform(searchRoot, true);
+        Transform rightControllerTr = FindControllerTransform(searchRoot, false);
+
+        if (leftControllerTr != null && !leftControllerTr.gameObject.activeSelf)
+        {
+            leftControllerTr.gameObject.SetActive(true);
+        }
+        if (rightControllerTr != null && !rightControllerTr.gameObject.activeSelf)
+        {
+            rightControllerTr.gameObject.SetActive(true);
+        }
+
+        EnsureVRHandsInitialized();
+
+        if (leftHandVisual != null && !leftHandVisual.gameObject.activeSelf)
+        {
+            leftHandVisual.gameObject.SetActive(true);
+        }
+        if (rightHandVisual != null && !rightHandVisual.gameObject.activeSelf)
+        {
+            rightHandVisual.gameObject.SetActive(true);
+        }
+    }
+
+    private void EnsureVRHandsInitialized()
+    {
+        Transform searchRoot = xrOrigin != null ? xrOrigin.transform : transform;
+
+        if (leftHandVisual == null || rightHandVisual == null)
+        {
+            VRHandController[] hands = searchRoot.GetComponentsInChildren<VRHandController>(true);
+            foreach (VRHandController hand in hands)
+            {
+                if (hand == null) continue;
+                if (hand.isLeftHand && leftHandVisual == null) leftHandVisual = hand;
+                else if (!hand.isLeftHand && rightHandVisual == null) rightHandVisual = hand;
+            }
+        }
+
+        if (Application.isPlaying && (leftHandVisual == null || rightHandVisual == null))
+        {
+            Transform leftControllerTr = FindControllerTransform(searchRoot, true);
+            Transform rightControllerTr = FindControllerTransform(searchRoot, false);
+
+            if (leftHandVisual == null && leftControllerTr != null)
+            {
+                GameObject prefabL = leftHandPrefab != null ? leftHandPrefab : Resources.Load<GameObject>("Hands/VRPlayerHand_L");
+                if (prefabL != null)
+                {
+                    GameObject instL = Instantiate(prefabL, leftControllerTr, false);
+                    instL.name = "VRPlayerHand_L";
+                    leftHandVisual = instL.GetComponent<VRHandController>();
+                }
+            }
+
+            if (rightHandVisual == null && rightControllerTr != null)
+            {
+                GameObject prefabR = rightHandPrefab != null ? rightHandPrefab : Resources.Load<GameObject>("Hands/VRPlayerHand_R");
+                if (prefabR != null)
+                {
+                    GameObject instR = Instantiate(prefabR, rightControllerTr, false);
+                    instR.name = "VRPlayerHand_R";
+                    rightHandVisual = instR.GetComponent<VRHandController>();
+                }
+            }
+        }
+    }
+
+
+
+    public static Transform FindControllerTransform(Transform root, bool left)
+    {
+        if (root == null) return null;
+        string targetName = left ? "Left Controller" : "Right Controller";
+        Transform[] all = root.GetComponentsInChildren<Transform>(true);
+        foreach (Transform tr in all)
+        {
+            if (tr != null && tr.name == targetName)
+                return tr;
+        }
+        return null;
     }
 
     // =========================================================================
@@ -606,6 +781,14 @@ public class XRControllerLayoutManager : MonoBehaviour
             if (leftHandPaddle == null) leftHandPaddle = menuManager.leftHandPaddle;
             if (rightControllerModel == null) rightControllerModel = menuManager.rightControllerModel;
             if (leftControllerModel == null) leftControllerModel = menuManager.leftControllerModel;
+        }
+
+        VRHandController[] hands = searchRoot.GetComponentsInChildren<VRHandController>(true);
+        foreach (VRHandController hand in hands)
+        {
+            if (hand == null) continue;
+            if (hand.isLeftHand) leftHandVisual = hand;
+            else rightHandVisual = hand;
         }
     }
 }

@@ -61,6 +61,9 @@ public static class XRLayoutSetupEditor
             manager.defaultLayout = ControllerLayoutMode.Match;
         }
 
+        VRHandsSetupEditor.EnsureHandPrefabVariantsExist();
+        VRHandsSetupEditor.SetupHandsInCurrentScene(showDialog: false);
+
         EditorUtility.SetDirty(manager);
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         Selection.activeGameObject = manager.gameObject;

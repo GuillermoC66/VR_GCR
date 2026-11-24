@@ -412,24 +412,26 @@ public class MenuManager : MonoBehaviour
         }
 
         // Si hay XRControllerLayoutManager, delegamos el espejo y guardado en PlayerPrefs
+        if (layoutManager == null) BindLayoutManager();
         if (layoutManager != null)
         {
             layoutManager.SetLefty(isLefty);
             return;
         }
 
+        bool hasVRHands = FindFirstObjectByType<VRHandController>() != null;
         if (isLefty)
         {
             if (rightHandPaddle != null) rightHandPaddle.SetActive(false);
             if (leftHandPaddle != null) leftHandPaddle.SetActive(true);
             if (leftControllerModel != null) leftControllerModel.SetActive(false);
-            if (rightControllerModel != null) rightControllerModel.SetActive(true);
+            if (rightControllerModel != null) rightControllerModel.SetActive(!hasVRHands);
         }
         else
         {
             if (rightHandPaddle != null) rightHandPaddle.SetActive(true);
             if (leftHandPaddle != null) leftHandPaddle.SetActive(false);
-            if (leftControllerModel != null) leftControllerModel.SetActive(true);
+            if (leftControllerModel != null) leftControllerModel.SetActive(!hasVRHands);
             if (rightControllerModel != null) rightControllerModel.SetActive(false);
         }
     }

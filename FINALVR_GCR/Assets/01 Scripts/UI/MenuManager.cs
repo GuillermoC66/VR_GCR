@@ -411,28 +411,16 @@ public class MenuManager : MonoBehaviour
             ballSummoner.isLefty = isLefty;
         }
 
-        // Si hay XRControllerLayoutManager, delegamos el espejo y guardado en PlayerPrefs
+        // XRControllerLayoutManager es la fuente única de verdad para la visibilidad de palas y modo zurdo
         if (layoutManager == null) BindLayoutManager();
+        if (layoutManager == null) layoutManager = FindFirstObjectByType<XRControllerLayoutManager>();
         if (layoutManager != null)
         {
             layoutManager.SetLefty(isLefty);
-            return;
-        }
-
-        bool hasVRHands = FindFirstObjectByType<VRHandController>() != null;
-        if (isLefty)
-        {
-            if (rightHandPaddle != null) rightHandPaddle.SetActive(false);
-            if (leftHandPaddle != null) leftHandPaddle.SetActive(true);
-            if (leftControllerModel != null) leftControllerModel.SetActive(false);
-            if (rightControllerModel != null) rightControllerModel.SetActive(!hasVRHands);
         }
         else
         {
-            if (rightHandPaddle != null) rightHandPaddle.SetActive(true);
-            if (leftHandPaddle != null) leftHandPaddle.SetActive(false);
-            if (leftControllerModel != null) leftControllerModel.SetActive(!hasVRHands);
-            if (rightControllerModel != null) rightControllerModel.SetActive(false);
+            Debug.LogWarning("[MenuManager] No se encontró XRControllerLayoutManager para actualizar la visibilidad de las palas.");
         }
     }
 

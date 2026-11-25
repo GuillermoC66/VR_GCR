@@ -11,7 +11,10 @@ public enum HandVisualMode
 
 /// <summary>
 /// Controla una mano virtual basada en OpenXRCustomHandPrefab usando únicamente entradas de control VR.
-/// Mantiene siempre visible tanto la mano virtual como el modelo visual del controlador (Left/Right Controller Visual).
+/// Soporta 3 modos:
+/// 1) NormalControllerInput: Lobby, Title y mano libre en menús (reacciona a Grip, Trigger, Point y Thumb).
+/// 2) PaddleShakehandGrip: Mano dominante en partidos (siempre cerrada en agarre shakehand sobre el mango de la pala, sin alterar el Transform de la pala).
+/// 3) MatchOffHandBallGrab: Mano no dominante en partido activo (ignora otros botones y ejecuta agarre de saque de 3 dedos al presionar Grab).
 /// </summary>
 [DefaultExecutionOrder(-250)]
 public class VRHandController : MonoBehaviour
@@ -39,9 +42,6 @@ public class VRHandController : MonoBehaviour
     [Tooltip("Raíz del esqueleto/malla (OpenXRLeftHand u OpenXRRightHand, padre directo de XRHand_Wrist).")]
     public Transform handModelRoot;
 
-    [Tooltip("Objeto visual del controlador (Left Controller Visual / Right Controller Visual) para mantenerlo siempre visible.")]
-    public Transform controllerVisualRoot;
-
     [Tooltip("Animator con OpenXR_HandController_Left/Right en OpenXRLeftHand/OpenXRRightHand.")]
     public Animator handAnimator;
 
@@ -61,6 +61,19 @@ public class VRHandController : MonoBehaviour
 
     [Tooltip("Rotación Euler local de la muñeca respecto al Left/Right Controller (Izq: 0,0,90 | Der: 0,0,-90).")]
     public Vector3 normalLocalEuler = new Vector3(0f, 0f, 90f);
+
+    [Header("Rotación en Modo Juego (Game Mode)")]
+    [Tooltip("Rotación Euler local de Right Controller Visual cuando está en modo Diestro (Righty).")]
+    public Vector3 rightControllerRightyRotation = Vector3.zero;
+
+    [Tooltip("Rotación Euler local de Right Controller Visual cuando está en modo Zurdo (Lefty).")]
+    public Vector3 rightControllerLeftyRotation = Vector3.zero;
+
+    [Tooltip("Rotación Euler local de Left Controller Visual cuando está en modo Diestro (Righty).")]
+    public Vector3 leftControllerRightyRotation = Vector3.zero;
+
+    [Tooltip("Rotación Euler local de Left Controller Visual cuando está en modo Zurdo (Lefty).")]
+    public Vector3 leftControllerLeftyRotation = Vector3.zero;
 
     [Header("Calibración Agarre Shakehand de Pala")]
     [Tooltip("Ángulo diagonal (grados) del eje de los nudillos respecto al ancho de la pala.")]
@@ -106,7 +119,6 @@ public class VRHandController : MonoBehaviour
     private Transform littleMetacarpal, littleProximal, littleIntermediate, littleDistal;
 
     private SkinnedMeshRenderer[] handRenderers;
-    private Renderer[] controllerRenderers;
 
     private void Awake()
     {
@@ -134,24 +146,6 @@ public class VRHandController : MonoBehaviour
                 found = FindDeepChild(transform, "XRHand_Wrist")?.parent;
             }
             handModelRoot = found != null ? found : transform;
-        }
-
-        // Localizar automáticamente Left Controller Visual / Right Controller Visual
-        if (controllerVisualRoot == null)
-        {
-            string expectedVisualName = isLeftHand ? "Left Controller Visual" : "Right Controller Visual";
-            Transform searchScope = transform.parent != null ? transform.parent : transform.root;
-
-            controllerVisualRoot = FindDeepChild(searchScope, expectedVisualName);
-            if (controllerVisualRoot == null)
-            {
-                controllerVisualRoot = FindDeepChild(searchScope, "Controller Visual");
-            }
-        }
-
-        if (controllerVisualRoot != null)
-        {
-            controllerRenderers = controllerVisualRoot.GetComponentsInChildren<Renderer>(true);
         }
 
         if (handAnimator == null && handModelRoot != null)
@@ -223,6 +217,7 @@ public class VRHandController : MonoBehaviour
 
             case HandVisualMode.PaddleShakehandGrip:
             {
+                // Siempre cerrada sujetando la pala desde el menú inicial hasta el fin del partido
                 smoothFlex = 1f;
                 smoothPinch = 0f;
                 smoothPoint = 0f;
@@ -233,6 +228,7 @@ public class VRHandController : MonoBehaviour
 
             case HandVisualMode.MatchOffHandBallGrab:
             {
+                // Ignora gatillo, stick y otros botones; solo anima el agarre de 3 dedos con Grab (Grip)
                 smoothFlex = 0f;
                 smoothPinch = 0f;
                 smoothPoint = 0f;
@@ -289,6 +285,16 @@ public class VRHandController : MonoBehaviour
     // POSICIONAMIENTO DE RAÍZ (CONTROLADOR NORMAL VS MANGO DE PALA)
     // =========================================================================
 
+    private Vector3 GetGameModeLocalEuler()
+    {
+        bool isLefty = XRControllerLayoutManager.Instance != null && XRControllerLayoutManager.Instance.IsLefty;
+        if (isLeftHand)
+        {
+            return isLefty ? leftControllerLeftyRotation : leftControllerRightyRotation;
+        }
+        return isLefty ? rightControllerLeftyRotation : rightControllerRightyRotation;
+    }
+
     public void ApplyNormalControllerRootPose()
     {
         Vector3 expectedPos = new Vector3(
@@ -296,13 +302,22 @@ public class VRHandController : MonoBehaviour
             normalLocalPosition.y,
             normalLocalPosition.z);
 
-        Vector3 expectedEuler = new Vector3(
-            normalLocalEuler.x,
-            isLeftHand ? normalLocalEuler.y : -normalLocalEuler.y,
-            isLeftHand ? Mathf.Abs(normalLocalEuler.z) : -Mathf.Abs(normalLocalEuler.z));
+        Quaternion expectedRot;
+        if (currentMode != HandVisualMode.NormalControllerInput)
+        {
+            expectedRot = Quaternion.Euler(GetGameModeLocalEuler());
+        }
+        else
+        {
+            Vector3 expectedEuler = new Vector3(
+                normalLocalEuler.x,
+                isLeftHand ? normalLocalEuler.y : -normalLocalEuler.y,
+                isLeftHand ? Mathf.Abs(normalLocalEuler.z) : -Mathf.Abs(normalLocalEuler.z));
+            expectedRot = Quaternion.Euler(expectedEuler);
+        }
 
         transform.localPosition = expectedPos;
-        transform.localRotation = Quaternion.Euler(expectedEuler);
+        transform.localRotation = expectedRot;
 
         if (handModelRoot != null && handModelRoot != transform)
         {
@@ -339,11 +354,8 @@ public class VRHandController : MonoBehaviour
             return;
         }
 
-        float yawRad = paddleGripYawDegrees * Mathf.Deg2Rad;
-        Vector3 handForward = (Mathf.Sin(yawRad) * axisL + Mathf.Cos(yawRad) * axisW).normalized;
-        Vector3 handUp = -axisN;
-
-        Quaternion worldRot = Quaternion.LookRotation(handForward, handUp);
+        transform.localRotation = Quaternion.Euler(GetGameModeLocalEuler());
+        Quaternion worldRot = transform.rotation;
 
         Vector3 paddleBaseWorld = targetPaddle.TransformPoint(PaddleMeshOriginMidZ);
         Vector3 handleTargetWorld = paddleBaseWorld
@@ -356,8 +368,7 @@ public class VRHandController : MonoBehaviour
             handGripCenterLocal.y,
             handGripCenterLocal.z);
 
-        Vector3 worldPos = handleTargetWorld - (worldRot * gripLocal);
-        transform.SetPositionAndRotation(worldPos, worldRot);
+        transform.position = handleTargetWorld - (worldRot * gripLocal);
 
         if (handModelRoot != null && handModelRoot != transform)
         {
@@ -374,10 +385,12 @@ public class VRHandController : MonoBehaviour
     {
         if (!bonesCached) CacheBones();
 
+        // Índice extendido apoyado suavemente sobre la base de la goma de revés (sin atravesar la hoja)
         if (indexProximal != null) indexProximal.localRotation = HandEuler(0f, 12f, -8f);
         if (indexIntermediate != null) indexIntermediate.localRotation = HandEuler(3f, 0f, 0f);
         if (indexDistal != null) indexDistal.localRotation = HandEuler(2f, 0f, 0f);
 
+        // Pulgar apoyado oblicuamente sobre el cuello/mango del lado de drive
         if (thumbMetacarpal != null) thumbMetacarpal.localRotation = HandEuler(26f, 34f, 295f);
         if (thumbProximal != null) thumbProximal.localRotation = HandEuler(24f, -4f, 10f);
         if (thumbDistal != null) thumbDistal.localRotation = HandEuler(20f, 0f, -6f);
@@ -388,6 +401,7 @@ public class VRHandController : MonoBehaviour
         if (!bonesCached) CacheBones();
         t = Mathf.Clamp01(t);
 
+        // Pose abierta relajada (Cap) -> Cuna de 3 dedos (Pulgar, Índice y Medio rodeando la pelota de 4 cm)
         BlendBone(thumbMetacarpal, 16.6f, 46.3f, 293.6f, 36.0f, 42.0f, 286.0f, t);
         BlendBone(thumbProximal, 33.1f, -2.6f, 8.8f, 31.0f, -2.0f, 9.0f, t);
         BlendBone(thumbDistal, 5.0f, 6.2f, -9.1f, 16.0f, 1.0f, -8.0f, t);
@@ -400,6 +414,7 @@ public class VRHandController : MonoBehaviour
         BlendBone(middleIntermediate, 28.4f, 0.2f, 1.5f, 40.0f, 0.5f, 2.0f, t);
         BlendBone(middleDistal, 11.3f, 1.0f, 6.2f, 22.0f, 1.0f, 5.0f, t);
 
+        // Anular y meñique se recogen suavemente a mitad de recorrido para despejar la pelota
         BlendBone(ringProximal, 28.9f, -11.2f, 5.9f, 54.0f, -8.0f, 8.0f, t);
         BlendBone(ringIntermediate, 29.7f, 2.0f, 5.1f, 58.0f, 2.0f, 5.0f, t);
         BlendBone(ringDistal, 17.6f, 3.7f, 1.9f, 38.0f, 4.0f, 2.0f, t);
@@ -508,6 +523,7 @@ public class VRHandController : MonoBehaviour
         trigger = 0f;
         anyThumbActive = false;
 
+        // 1) Lectura vía UnityEngine.XR.InputDevices (funciona siempre sin importar ActionMaps activos)
         XRNode node = isLeftHand ? XRNode.LeftHand : XRNode.RightHand;
         UnityEngine.XR.InputDevice xrDevice = InputDevices.GetDeviceAtXRNode(node);
         if (xrDevice.isValid)
@@ -533,6 +549,7 @@ public class VRHandController : MonoBehaviour
             anyThumbActive |= pBtn || sBtn || pTch || sTch || aTch || aClk || stickMoved;
         }
 
+        // 2) Respaldo vía InputSystem XRController (útil en XR Device Simulator y perfiles OpenXR)
         var sysController = InputSystem.GetDevice<UnityEngine.InputSystem.XR.XRController>(
             isLeftHand ? UnityEngine.InputSystem.CommonUsages.LeftHand : UnityEngine.InputSystem.CommonUsages.RightHand);
 
@@ -576,7 +593,7 @@ public class VRHandController : MonoBehaviour
     }
 
     // =========================================================================
-    // INICIALIZACIÓN INTERNA DE HUESOS, PUNTO DE PELOTA Y VISIBILIDAD
+    // INICIALIZACIÓN INTERNA DE HUESOS, PUNTO DE PELOTA Y COMPONENTES OVR
     // =========================================================================
 
     private void DisableOpticalTrackingComponents()
@@ -599,42 +616,18 @@ public class VRHandController : MonoBehaviour
 
     private void EnsureRenderersVisible()
     {
-        // 1. Mantener siempre visible la mano virtual
         if (handModelRoot != null && !handModelRoot.gameObject.activeSelf)
         {
             handModelRoot.gameObject.SetActive(true);
         }
 
-        if (handRenderers != null)
+        if (handRenderers == null) return;
+        foreach (SkinnedMeshRenderer smr in handRenderers)
         {
-            foreach (SkinnedMeshRenderer smr in handRenderers)
-            {
-                if (smr == null) continue;
-                if (!smr.gameObject.activeSelf) smr.gameObject.SetActive(true);
-                if (!smr.enabled) smr.enabled = true;
-                if (!smr.updateWhenOffscreen) smr.updateWhenOffscreen = true;
-            }
-        }
-
-        // 2. Mantener siempre visible el modelo visual del controlador (Left/Right Controller Visual)
-        if (controllerVisualRoot != null)
-        {
-            if (!controllerVisualRoot.gameObject.activeSelf)
-            {
-                controllerVisualRoot.gameObject.SetActive(true);
-            }
-
-            if (controllerRenderers == null || controllerRenderers.Length == 0)
-            {
-                controllerRenderers = controllerVisualRoot.GetComponentsInChildren<Renderer>(true);
-            }
-
-            foreach (Renderer r in controllerRenderers)
-            {
-                if (r == null) continue;
-                if (!r.gameObject.activeSelf) r.gameObject.SetActive(true);
-                if (!r.enabled) r.enabled = true;
-            }
+            if (smr == null) continue;
+            if (!smr.gameObject.activeSelf) smr.gameObject.SetActive(true);
+            if (!smr.enabled) smr.enabled = true;
+            if (!smr.updateWhenOffscreen) smr.updateWhenOffscreen = true;
         }
     }
 

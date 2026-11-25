@@ -169,6 +169,9 @@ public class XRControllerLayoutManager : MonoBehaviour
             IsLefty = PlayerPrefs.GetInt(LeftyPrefKey, 0) == 1;
         }
 
+        ResolvePaddleReferences();
+        ApplyPaddleVisibility();
+
         // Garantizar desde Awake que XRInputModalityManager no apague Left/Right Controller y que ambas manos inicien prendidas
         EnsureControllersAndHandsActive();
 
@@ -207,6 +210,12 @@ public class XRControllerLayoutManager : MonoBehaviour
         {
             UpdateMatchLateralMovement();
         }
+    }
+
+    private void LateUpdate()
+    {
+        // Garantiza en cada frame que solo la pala de la mano dominante permanezca activa
+        ApplyPaddleVisibility();
     }
 
     // =========================================================================
@@ -436,11 +445,13 @@ public class XRControllerLayoutManager : MonoBehaviour
 
     private void ApplyHandVisuals(ControllerLayoutMode mode)
     {
+        ResolvePaddleReferences();
         EnsureControllersAndHandsActive();
+        ApplyPaddleVisibility();
+
         bool hasVRHands = rightHandVisual != null || leftHandVisual != null;
         if (hasVRHands)
         {
-
             if (rightHandVisual != null && !rightHandVisual.gameObject.activeSelf)
                 rightHandVisual.gameObject.SetActive(true);
             if (leftHandVisual != null && !leftHandVisual.gameObject.activeSelf)
@@ -448,10 +459,6 @@ public class XRControllerLayoutManager : MonoBehaviour
 
             if (IsMatchScene)
             {
-                // En escenas de partido, la pala y el agarre shakehand de la mano dominante se muestran SIEMPRE (desde el menú inicial, pausa y partido)
-                if (rightHandPaddle != null) rightHandPaddle.SetActive(!IsLefty);
-                if (leftHandPaddle != null) leftHandPaddle.SetActive(IsLefty);
-
                 VRHandController dominantHand = IsLefty ? leftHandVisual : rightHandVisual;
                 VRHandController offHand = IsLefty ? rightHandVisual : leftHandVisual;
                 Transform activePaddleTransform = IsLefty
@@ -473,10 +480,6 @@ public class XRControllerLayoutManager : MonoBehaviour
             }
             else
             {
-                // En Lobby y Scene_Title: palas ocultas y ambas manos reaccionan normalmente a los inputs
-                if (rightHandPaddle != null) rightHandPaddle.SetActive(false);
-                if (leftHandPaddle != null) leftHandPaddle.SetActive(false);
-
                 if (rightHandVisual != null) rightHandVisual.SetMode(HandVisualMode.NormalControllerInput, null);
                 if (leftHandVisual != null) leftHandVisual.SetMode(HandVisualMode.NormalControllerInput, null);
             }
@@ -486,18 +489,90 @@ public class XRControllerLayoutManager : MonoBehaviour
         // Fallback legado solo si no hay manos VR en la escena
         if (mode == ControllerLayoutMode.Match)
         {
-            if (rightHandPaddle != null) rightHandPaddle.SetActive(!IsLefty);
-            if (leftHandPaddle != null) leftHandPaddle.SetActive(IsLefty);
             if (rightControllerModel != null) rightControllerModel.SetActive(IsLefty);
             if (leftControllerModel != null) leftControllerModel.SetActive(!IsLefty);
         }
         else
         {
-            if (rightHandPaddle != null) rightHandPaddle.SetActive(false);
-            if (leftHandPaddle != null) leftHandPaddle.SetActive(false);
             if (rightControllerModel != null) rightControllerModel.SetActive(true);
             if (leftControllerModel != null) leftControllerModel.SetActive(true);
         }
+    }
+
+    /// <summary>
+    /// Fuente única de verdad para la visibilidad de las palas:
+    /// en escenas de partido solo activa la pala de la mano dominante y apaga la no dominante (y cualquier duplicado).
+    /// </summary>
+    public void ApplyPaddleVisibility()
+    {
+        bool showRightPaddle = IsMatchScene && !IsLefty;
+        bool showLeftPaddle = IsMatchScene && IsLefty;
+
+        if (rightHandPaddle != null && rightHandPaddle.activeSelf != showRightPaddle)
+            rightHandPaddle.SetActive(showRightPaddle);
+        if (leftHandPaddle != null && leftHandPaddle.activeSelf != showLeftPaddle)
+            leftHandPaddle.SetActive(showLeftPaddle);
+
+        GameObject activePaddle = showRightPaddle ? rightHandPaddle : (showLeftPaddle ? leftHandPaddle : null);
+        DisableDuplicatePaddlesUnder(cachedLeftControllerTr, activePaddle);
+        DisableDuplicatePaddlesUnder(cachedRightControllerTr, activePaddle);
+    }
+
+    private static void DisableDuplicatePaddlesUnder(Transform controllerTr, GameObject allowedPaddle)
+    {
+        if (controllerTr == null) return;
+        PaddleFlickController[] paddles = controllerTr.GetComponentsInChildren<PaddleFlickController>(true);
+        foreach (PaddleFlickController p in paddles)
+        {
+            if (p != null && p.gameObject != allowedPaddle && p.gameObject.activeSelf)
+            {
+                p.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private Transform cachedLeftControllerTr;
+    private Transform cachedRightControllerTr;
+
+    private void ResolvePaddleReferences()
+    {
+        Transform searchRoot = xrOrigin != null ? xrOrigin.transform : transform;
+        if (cachedLeftControllerTr == null) cachedLeftControllerTr = FindControllerTransform(searchRoot, true);
+        if (cachedRightControllerTr == null) cachedRightControllerTr = FindControllerTransform(searchRoot, false);
+
+        if (rightHandPaddle == null && cachedRightControllerTr != null)
+            rightHandPaddle = FindPaddleUnderController(cachedRightControllerTr);
+        if (leftHandPaddle == null && cachedLeftControllerTr != null)
+            leftHandPaddle = FindPaddleUnderController(cachedLeftControllerTr);
+
+        if (rightHandPaddle == null || leftHandPaddle == null)
+        {
+            MenuManager menuManager = FindFirstObjectByType<MenuManager>();
+            if (menuManager != null)
+            {
+                if (rightHandPaddle == null) rightHandPaddle = menuManager.rightHandPaddle;
+                if (leftHandPaddle == null) leftHandPaddle = menuManager.leftHandPaddle;
+            }
+        }
+    }
+
+    private static GameObject FindPaddleUnderController(Transform controllerTr)
+    {
+        if (controllerTr == null) return null;
+        PaddleFlickController pfc = controllerTr.GetComponentInChildren<PaddleFlickController>(true);
+        if (pfc != null) return pfc.gameObject;
+
+        for (int i = 0; i < controllerTr.childCount; i++)
+        {
+            Transform child = controllerTr.GetChild(i);
+            string n = child.name;
+            if (n.IndexOf("pala", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                n.IndexOf("paddle", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return child.gameObject;
+            }
+        }
+        return null;
     }
 
     /// <summary>
@@ -774,11 +849,11 @@ public class XRControllerLayoutManager : MonoBehaviour
         continuousTurnProvider = searchRoot.GetComponentInChildren<ContinuousTurnProvider>(true);
         teleportationProvider = searchRoot.GetComponentInChildren<TeleportationProvider>(true);
 
+        ResolvePaddleReferences();
+
         MenuManager menuManager = FindFirstObjectByType<MenuManager>();
         if (menuManager != null)
         {
-            if (rightHandPaddle == null) rightHandPaddle = menuManager.rightHandPaddle;
-            if (leftHandPaddle == null) leftHandPaddle = menuManager.leftHandPaddle;
             if (rightControllerModel == null) rightControllerModel = menuManager.rightControllerModel;
             if (leftControllerModel == null) leftControllerModel = menuManager.leftControllerModel;
         }
